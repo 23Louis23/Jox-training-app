@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jox — Programme Masse</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:        #0F0F0F;
+    --surface:   #181818;
+    --card:      #1F1F1F;
+    --border:    #2C2C2C;
+    --red:       #B22222;
+    --red-deep:  #7B1D1D;
+    --orange:    #D2691E;
+    --gold:      #C9932A;
+    --green:     #2A6B35;
+    --green-light: #3d9b4e;
+    --text:      #F0EDE8;
+    --muted:     #888880;
+    --yellow-in: #FFF9C4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── PIN GATE ── */
+  #pinGate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .pin-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 4px;
+    padding: 32px 28px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+  }
+  .pin-box .logo { justify-content: center; margin-bottom: 6px; }
+  .pin-sub { font-size: 11px; color: var(--muted); margin-bottom: 20px; letter-spacing: 1px; }
+  .pin-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    padding: 12px;
+    border-radius: 2px;
+    text-align: center;
+    letter-spacing: 6px;
+    margin-bottom: 14px;
+  }
+  .pin-input:focus { outline: none; border-color: var(--orange); }
+  .pin-error {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 12px;
+    display: none;
+  }
+  #appRoot { display: none; }
+  #loadingMsg {
+    position: fixed; inset: 0; background: var(--bg); z-index: 900;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 2px; font-size: 13px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--red-deep);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    border-bottom: 2px solid var(--orange);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--text);
+    display: flex;
+  }
+  .logo span { color: var(--orange); }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 24px 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 16px 10px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all .2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
+  .view.active { display: block; }
+
+  /* ── WEEK SELECTOR ── */
+  .week-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .week-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all .2s;
+  }
+  .week-btn.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+
+  /* ── SECTION TITLE ── */
+  .section-head {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+  .section-head:first-child { margin-top: 0; }
+
+  /* ── HOOPER CARD ── */
+  .hooper-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--green);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .hooper-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--green-light);
+    margin-bottom: 4px;
+  }
+  .hooper-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .hooper-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .hooper-label {
+    font-size: 13px;
+    color: var(--text);
+    width: 160px;
+    flex-shrink: 0;
+  }
+  .hooper-label .emoji { margin-right: 6px; }
+  .slider-wrap { flex: 1; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--green-light);
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(61,155,78,.2);
+  }
+  .slider-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    width: 28px;
+    text-align: right;
+    color: var(--text);
+  }
+  .hooper-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .score-display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .score-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .score-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── EXERCISE TABLE ── */
+  .exo-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .exo-header {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 70px 70px 100px;
+    gap: 0;
+    background: #111;
+    padding: 8px 16px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .exo-row {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 70px 70px 100px;
+    gap: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background .15s;
+  }
+  .exo-row:last-child { border-bottom: none; }
+  .exo-row:hover { background: var(--surface); }
+  .exo-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .exo-meta {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .exo-rpe {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--orange);
+    font-weight: 600;
+  }
+  .weight-input-wrap { position: relative; }
+  .weight-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    width: 80px;
+    padding: 6px 8px;
+    border-radius: 2px;
+    text-align: center;
+    transition: border-color .2s;
+  }
+  .weight-input:focus {
+    outline: none;
+    border-color: var(--orange);
+    background: #252525;
+  }
+  .weight-input.saved { border-color: var(--green); }
+  .weight-unit {
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+  .drop-set-row {
+    background: rgba(255,255,255,.02);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .drop-set-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── SEANCE NAV ── */
+  .seance-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .seance-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: all .2s;
+  }
+  .seance-btn.active {
+    background: var(--red-deep);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .seance-btn.done::after {
+    content: ' ✓';
+    color: var(--green-light);
+  }
+
+  /* ── SAVE BTN ── */
+  .save-btn {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-top: 16px;
+    transition: background .2s;
+    width: 100%;
+  }
+  .save-btn:hover { background: #c92c2c; }
+  .save-btn:active { background: var(--red-deep); }
+
+  /* ── DASHBOARD ── */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+  }
+  .stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .progress-bar-wrap {
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 10px;
+  }
+  .progress-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--orange);
+    transition: width .4s ease;
+  }
+
+  /* ── HISTORY TABLE ── */
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .history-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .history-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .history-table tr:hover td { background: var(--surface); }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--green);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 640px) {
+    .exo-header, .exo-row {
+      grid-template-columns: 1fr 70px 60px 50px;
+    }
+    .exo-header .col-tempo,
+    .exo-row .col-tempo,
+    .exo-header .col-recup,
+    .exo-row .col-recup { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PIN GATE                                     -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="pinGate">
+  <div class="pin-box">
+    <div class="logo">JOX<span>.</span>TRAINING</div>
+    <div class="pin-sub">Entre le code d'accès</div>
+    <input type="password" inputmode="numeric" autocomplete="off" class="pin-input" id="pinInput" placeholder="••••" onkeydown="if(event.key==='Enter') checkPin()">
+    <button class="save-btn" onclick="checkPin()">Entrer</button>
+    <div class="pin-error" id="pinError">Code incorrect</div>
+  </div>
+</div>
+
+<div id="loadingMsg" style="display:none">CHARGEMENT…</div>
+
+<div id="appRoot">
+
+<header>
+  <div class="logo">JOX<span>.</span>TRAINING</div>
+  <div style="font-size:11px;color:var(--muted);letter-spacing:1px">BLOC 1 — MASSE</div>
+</header>
+
+<!-- TAB NAV -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('tab-seance')">📋 Séance</button>
+  <button class="tab-btn" onclick="showTab('tab-dashboard')">📊 Tableau de bord</button>
+  <button class="tab-btn" onclick="showTab('tab-history')">🕐 Historique</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: SÉANCE                                  -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="tab-seance" class="view active">
+
+  <!-- Week selector -->
+  <div class="section-head">Semaine</div>
+  <div class="week-selector" id="weekSelector"></div>
+
+  <!-- Seance selector -->
+  <div class="section-head">Séance</div>
+  <div class="seance-nav" id="seanceNav"></div>
+
+  <!-- Hooper -->
+  <div class="section-head">Index de Hooper — avant la séance</div>
+  <div class="hooper-card">
+    <div class="hooper-title">🔋 CHARGE INTERNE</div>
+    <div class="hooper-subtitle">Note de 1 (très bien) à 7 (très mauvais)</div>
+
+    <div class="hooper-row">
+      <div class="hooper-label"><span class="emoji">😴</span>Sommeil</div>
+      <div class="slider-wrap">
+        <input type="range" min="1" max="7" value="1" id="sl-sommeil" oninput="updateHooper()">
+      </div>
+      <div class="slider-val" id="v-sommeil">1</div>
+    </div>
+    <div class="hooper-row">
+      <div class="hooper-label"><span class="emoji">😓</span>Stress</div>
+      <div class="slider-wrap">
+        <input type="range" min="1" max="7" value="1" id="sl-stress" oninput="updateHooper()">
+      </div>
+      <div class="slider-val" id="v-stress">1</div>
+    </div>
+    <div class="hooper-row">
+      <div class="hooper-label"><span class="emoji">😫</span>Fatigue générale</div>
+      <div class="slider-wrap">
+        <input type="range" min="1" max="7" value="1" id="sl-fatigue" oninput="updateHooper()">
+      </div>
+      <div class="slider-val" id="v-fatigue">1</div>
+    </div>
+    <div class="hooper-row">
+      <div class="hooper-label"><span class="emoji">💪</span>Douleur musc.</div>
+      <div class="slider-wrap">
+        <input type="range" min="1" max="7" value="1" id="sl-douleur" oninput="updateHooper()">
+      </div>
+      <div class="slider-val" id="v-douleur">1</div>
+    </div>
+
+    <div class="hooper-score-row">
+      <div>
+        <div class="score-display" id="hooper-total">4</div>
+        <div class="score-label">SCORE / 28</div>
+      </div>
+      <div id="hooper-badge" class="score-badge"></div>
+    </div>
+  </div>
+
+  <!-- Exercises -->
+  <div class="section-head" id="exo-section-title">Exercices</div>
+  <div id="exo-list"></div>
+
+  <button class="save-btn" onclick="saveSession()">💾 ENREGISTRER LA SÉANCE</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: DASHBOARD                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="tab-dashboard" class="view">
+  <div class="section-head">Progression globale</div>
+  <div class="dash-grid" id="dash-stats"></div>
+  <div class="section-head">Évolution des charges — exercices clés</div>
+  <div id="dash-chart"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: HISTORIQUE                             -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="tab-history" class="view">
+  <div class="section-head">Séances enregistrées</div>
+  <div id="history-content"></div>
+</div>
+
+</div><!-- /appRoot -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONFIG — remplis ces valeurs (voir README.md)
+// ═══════════════════════════════════════════════════
+const SUPABASE_URL = "https://itubxfyqqpthwpqhbrje.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0dWJ4ZnlxcXB0aHdwcWhicmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjk4NzcsImV4cCI6MjA5ODc0NTg3N30.l_E1eAgVRusOJNHHDGbn3ulEXexYJp25gPUG2_7CGBM";
+const APP_PIN = "2468"; // change ce code si tu veux, partage-le uniquement avec ton athlète
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ═══════════════════════════════════════════════════
+// DATA — Programme Jox
+// ═══════════════════════════════════════════════════
+const PROGRAMME = {
+  "S1": {
+    label: "Semaine 1",
+    seances: ["S1","S2","S3","S4"]
+  },
+  "S2": {
+    label: "Semaine 2",
+    seances: ["S1","S2","S3","S4"]
+  },
+  "S3": {
+    label: "Semaine 3",
+    seances: ["A","B","C","D","E"]
+  },
+  "S4": {
+    label: "Semaine 4",
+    seances: ["A","B","C","D","E"]
+  },
+  "S5": {
+    label: "Semaine 5",
+    seances: ["A","B","C","D","E"]
+  },
+};
+
+const SEANCES = {
+  "S1": {
+    label: "S1 — Jambes / Dos / Biceps",
+    color: "#B22222",
+    exercices: [
+      { nom: "Back squat",                      series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Tirage vertical",                 series: "4 × 10", tempo: "1/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Leg curl",                        series: "4 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Leg extension",                   series: "4 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Pull-over poulie bras tendu",      series: "4 × 12", tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
+      { nom: "Biceps curl supination haltère",  series: "4 × 12", tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
+      { nom: "Drop-set biceps corde poulie basse", series: "4 × max (12-15)", tempo: "2/0/2/0", rpe: "10", recup: "1'30", dropset: true },
+    ]
+  },
+  "S2": {
+    label: "S2 — Pecs / Épaules / Triceps",
+    color: "#7B1D1D",
+    exercices: [
+      { nom: "Développé couché barre",                     series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Développé militaire",                        series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Écarté poulie basse",                        series: "4 × 10", tempo: "3/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Élévations latérales",                       series: "4 × 8",  tempo: "2/0/2/2", rpe: "9",    recup: "1'30" },
+      { nom: "Triceps poulie haute",                       series: "4 × 10", tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+      { nom: "Triceps extension unilatéral haltère",       series: "4 × 12", tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
+    ]
+  },
+  "S3": {
+    label: "S3 — Jambes / Dos / Biceps",
+    color: "#B22222",
+    exercices: [
+      { nom: "Split squat",                series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Rowing haltère",             series: "4 × 10", tempo: "1/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Hip thrust",                 series: "4 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Leg extension",              series: "4 × 10", tempo: "2/0/2/0", rpe: "8/9",  recup: "1'30" },
+      { nom: "Face pull",                  series: "4 × 10", tempo: "2/0/2/1", rpe: "8/9",  recup: "1'30" },
+      { nom: "Biceps barre EZ",            series: "4 × 12", tempo: "2/0/2/0", rpe: "8/9",  recup: "1'30" },
+      { nom: "Biceps curl marteau haltère",series: "4 × 15", tempo: "1/0/2/0", rpe: "8/9",  recup: "1'30" },
+    ]
+  },
+  "S4": {
+    label: "S4 — Pecs / Épaules / Triceps",
+    color: "#7B1D1D",
+    exercices: [
+      { nom: "Développé incliné barre",                series: "4 × 10",   tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Développé couché haltères",              series: "4 × 8",    tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Écarté poulie haute",                    series: "4 × 10",   tempo: "3/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Bi-set : Élévations frontales / lat.",   series: "4 × 10+10",tempo: "2/0/2/1", rpe: "9",    recup: "1'30" },
+      { nom: "Triceps poulie haute derrière soi",      series: "4 × 10",   tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+      { nom: "Triceps haltères au front",              series: "4 × 12",   tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+    ]
+  },
+  "A": {
+    label: "A — Jambes / Biceps",
+    color: "#C0392B",
+    exercices: [
+      { nom: "Back squat",                          series: "4 × 10",          tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Fentes avant barre",                  series: "4 × 10",          tempo: "2/1/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Leg curl",                            series: "4 × 12",          tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Leg extension",                       series: "4 × 12",          tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Calf extension",                      series: "4 × 12",          tempo: "2/0/1/2", rpe: "8",    recup: "1'30" },
+      { nom: "Biceps curl supination haltère",      series: "4 × 12",          tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
+      { nom: "Biceps curl machine guidé",           series: "3 × 15",          tempo: "1/0/2/0", rpe: "8",    recup: "1'30" },
+      { nom: "Drop-set biceps corde poulie basse",  series: "4 × max (12-15)", tempo: "2/0/2/0", rpe: "10",   recup: "1'30", dropset: true },
+    ]
+  },
+  "B": {
+    label: "B — Pecs / Épaules",
+    color: "#7B1D1D",
+    exercices: [
+      { nom: "Développé couché barre", series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Développé militaire",    series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Écarté poulie basse",    series: "4 × 10", tempo: "3/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Pec fly machine guidé",  series: "4 × 12", tempo: "2/0/2/0", rpe: "8/9",  recup: "1'30" },
+      { nom: "Élévations latérales",   series: "4 × 8",  tempo: "2/0/2/2", rpe: "9",    recup: "1'30" },
+      { nom: "Élévations frontales",   series: "4 × 8",  tempo: "2/0/2/2", rpe: "9",    recup: "1'30" },
+    ]
+  },
+  "C": {
+    label: "C — Dos / Biceps / Triceps",
+    color: "#B22222",
+    exercices: [
+      { nom: "Tirage vertical",                           series: "4 × 10", tempo: "1/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Rowing haltère",                            series: "4 × 10", tempo: "1/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Pull over poulie haute",                    series: "3 × 12", tempo: "1/0/2/0", rpe: "8/9",  recup: "1'30" },
+      { nom: "Biceps barre EZ",                           series: "4 × 12", tempo: "2/0/2/0", rpe: "8/9",  recup: "1'30" },
+      { nom: "Biceps curl marteau haltère",               series: "4 × 15", tempo: "1/0/2/0", rpe: "8/9",  recup: "1'30" },
+      { nom: "Triceps extension corde poulie haute",      series: "4 × 10", tempo: "2/0/1/2", rpe: "8/9",  recup: "1'30" },
+      { nom: "Triceps extension unilatéral haltère",      series: "4 × 12", tempo: "2/0/2/0", rpe: "8/9",  recup: "1'30" },
+    ]
+  },
+  "D": {
+    label: "D — Jambes / Épaules",
+    color: "#C0392B",
+    exercices: [
+      { nom: "Split squat",       series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Hip thrust",        series: "4 × 8",  tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Adducteur machine", series: "3 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Abducteur machine", series: "3 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Oiseau",            series: "4 × 10", tempo: "2/0/2/1", rpe: "9",    recup: "1'30" },
+      { nom: "Face pull",         series: "4 × 10", tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+      { nom: "Schrug",            series: "4 × 12", tempo: "1/0/1/2", rpe: "8",    recup: "1'30" },
+    ]
+  },
+  "E": {
+    label: "E — Pecs / Dos / Triceps",
+    color: "#7B1D1D",
+    exercices: [
+      { nom: "Développé incliné barre",           series: "4 × 10", tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Tirage horizontal",                 series: "4 × 8",  tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Écarté poulie haute",               series: "4 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
+      { nom: "Pull over haltère couché",          series: "4 × 10", tempo: "2/0/2/1", rpe: "9",    recup: "1'30" },
+      { nom: "Triceps poulie haute derrière soi", series: "4 × 10", tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+      { nom: "Triceps haltères au front",         series: "4 × 12", tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+    ]
+  },
+};
+
+// Known S1 weights for Jox
+const S1_WEIGHTS = {
+  "S1": { "Back squat": 100, "Tirage vertical": 73, "Leg curl": 35, "Leg extension": 73, "Pull-over poulie bras tendu": 50, "Biceps curl supination haltère": 20 },
+};
+
+// Hooper bands
+const HOOPER_BANDS = [
+  { min: 4,  max: 7.9,  label: "Excellent",    color: "#2A6B35", bg: "#D4EDDA" },
+  { min: 8,  max: 15.9, label: "Bon",          color: "#1F4E79", bg: "#D6EAF8" },
+  { min: 16, max: 19.9, label: "Moyen",        color: "#7D6608", bg: "#FEF9E7" },
+  { min: 20, max: 23.9, label: "Mauvais",      color: "#935116", bg: "#FDEBD0" },
+  { min: 24, max: 28,   label: "Très mauvais", color: "#7B1D1D", bg: "#FADBD8" },
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let currentWeek = "S1";
+let currentSeance = "S1";
+let dataCache = {};
+
+// ═══════════════════════════════════════════════════
+// PIN GATE
+// ═══════════════════════════════════════════════════
+function checkPin() {
+  const val = document.getElementById('pinInput').value;
+  if (val === APP_PIN) {
+    localStorage.setItem('jox_pin_ok', '1');
+    unlockApp();
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+  }
+}
+
+async function unlockApp() {
+  document.getElementById('pinGate').style.display = 'none';
+  document.getElementById('loadingMsg').style.display = 'flex';
+  await refreshData();
+  document.getElementById('loadingMsg').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'block';
+  renderWeeks();
+  renderSeanceNav();
+  renderSeance();
+  updateHooper();
+}
+
+if (localStorage.getItem('jox_pin_ok') === '1') {
+  unlockApp();
+}
+
+// ═══════════════════════════════════════════════════
+// DATA (Supabase)
+// ═══════════════════════════════════════════════════
+async function refreshData() {
+  const { data, error } = await db.from('sessions').select('*');
+  if (error) {
+    console.error(error);
+    showToast("Erreur de connexion à la base");
+    return;
+  }
+  dataCache = {};
+  (data || []).forEach(row => {
+    dataCache[`${row.week}_${row.seance}`] = {
+      week: row.week,
+      seance: row.seance,
+      label: row.label,
+      date: row.date_recorded,
+      hooper: row.hooper,
+      weights: row.weights,
+    };
+  });
+}
+
+function loadData() {
+  return dataCache;
+}
+
+// ═══════════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'tab-dashboard') renderDashboard();
+  if (id === 'tab-history') renderHistory();
+}
+
+function renderWeeks() {
+  const el = document.getElementById('weekSelector');
+  el.innerHTML = Object.keys(PROGRAMME).map(wk => `
+    <button class="week-btn ${wk === currentWeek ? 'active' : ''}"
+            onclick="selectWeek('${wk}')">
+      ${PROGRAMME[wk].label}
+    </button>
+  `).join('');
+}
+
+function selectWeek(wk) {
+  currentWeek = wk;
+  currentSeance = PROGRAMME[wk].seances[0];
+  renderWeeks();
+  renderSeanceNav();
+  renderSeance();
+}
+
+function renderSeanceNav() {
+  const seances = PROGRAMME[currentWeek].seances;
+  const data = loadData();
+  const el = document.getElementById('seanceNav');
+  el.innerHTML = seances.map(s => {
+    const key = `${currentWeek}_${s}`;
+    const done = data[key] ? 'done' : '';
+    const info = SEANCES[s];
+    return `<button class="seance-btn ${s === currentSeance ? 'active' : ''} ${done}"
+                    onclick="selectSeance('${s}')">${info.label.split('—')[0].trim()}</button>`;
+  }).join('');
+}
+
+function selectSeance(s) {
+  currentSeance = s;
+  renderSeanceNav();
+  renderSeance();
+}
+
+function renderSeance() {
+  const seance = SEANCES[currentSeance];
+  const data = loadData();
+  const key = `${currentWeek}_${currentSeance}`;
+  const saved = data[key] || {};
+
+  // Load Hooper
+  const hooper = saved.hooper || { sommeil: 1, stress: 1, fatigue: 1, douleur: 1 };
+  document.getElementById('sl-sommeil').value = hooper.sommeil;
+  document.getElementById('sl-stress').value  = hooper.stress;
+  document.getElementById('sl-fatigue').value = hooper.fatigue;
+  document.getElementById('sl-douleur').value = hooper.douleur;
+  updateHooper();
+
+  document.getElementById('exo-section-title').textContent = `Exercices — ${seance.label}`;
+
+  // Build exercise list
+  const el = document.getElementById('exo-list');
+  let html = `<div class="exo-card">
+    <div class="exo-header">
+      <span>Exercice</span>
+      <span>Séries</span>
+      <span class="col-tempo">Tempo</span>
+      <span class="col-recup">Récup</span>
+      <span>RPE</span>
+      <span>Charge (kg)</span>
+    </div>`;
+
+  seance.exercices.forEach((exo, i) => {
+    if (exo.dropset) {
+      html += `<div class="drop-set-row">
+        <span style="font-size:13px">🔻</span>
+        <span class="drop-set-label">${exo.nom} — ${exo.series} — RPE ${exo.rpe} — Récup ${exo.recup}</span>
+      </div>`;
+      return;
+    }
+    const defaultW = (currentWeek === 'S1' && S1_WEIGHTS['S1']?.[exo.nom]) || '';
+    const savedW = saved.weights?.[exo.nom] ?? defaultW;
+    html += `<div class="exo-row">
+      <span class="exo-name">${exo.nom}</span>
+      <span class="exo-meta">${exo.series}</span>
+      <span class="exo-meta col-tempo">${exo.tempo}</span>
+      <span class="exo-meta col-recup">${exo.recup}</span>
+      <span class="exo-rpe">${exo.rpe}</span>
+      <div class="weight-input-wrap">
+        <input type="number" class="weight-input ${savedW ? 'saved' : ''}"
+               id="w_${i}" value="${savedW}" placeholder="—" min="0" step="1.25"
+               oninput="this.classList.remove('saved')">
+        <span class="weight-unit">kg</span>
+      </div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// HOOPER
+// ═══════════════════════════════════════════════════
+function updateHooper() {
+  const s = +document.getElementById('sl-sommeil').value;
+  const st = +document.getElementById('sl-stress').value;
+  const f = +document.getElementById('sl-fatigue').value;
+  const d = +document.getElementById('sl-douleur').value;
+  document.getElementById('v-sommeil').textContent = s;
+  document.getElementById('v-stress').textContent  = st;
+  document.getElementById('v-fatigue').textContent = f;
+  document.getElementById('v-douleur').textContent = d;
+  const total = s + st + f + d;
+  document.getElementById('hooper-total').textContent = total;
+
+  const band = HOOPER_BANDS.find(b => total >= b.min && total <= b.max);
+  const badge = document.getElementById('hooper-badge');
+  if (band) {
+    badge.textContent = band.label;
+    badge.style.background = band.bg;
+    badge.style.color = band.color;
+    document.getElementById('hooper-total').style.color = band.color;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════════════
+async function saveSession() {
+  const seance = SEANCES[currentSeance];
+
+  const hooper = {
+    sommeil: +document.getElementById('sl-sommeil').value,
+    stress:  +document.getElementById('sl-stress').value,
+    fatigue: +document.getElementById('sl-fatigue').value,
+    douleur: +document.getElementById('sl-douleur').value,
+    total:   +document.getElementById('hooper-total').textContent,
+    label:   document.getElementById('hooper-badge').textContent,
+  };
+
+  const weights = {};
+  seance.exercices.forEach((exo, i) => {
+    if (exo.dropset) return;
+    const input = document.getElementById(`w_${i}`);
+    if (input && input.value) {
+      weights[exo.nom] = +input.value;
+      input.classList.add('saved');
+    }
+  });
+
+  const entry = {
+    week: currentWeek,
+    seance: currentSeance,
+    label: seance.label,
+    date_recorded: new Date().toLocaleDateString('fr-FR'),
+    hooper,
+    weights,
+  };
+
+  const { error } = await db.from('sessions').upsert(entry, { onConflict: 'week,seance' });
+  if (error) {
+    console.error(error);
+    showToast("Erreur d'enregistrement");
+    return;
+  }
+
+  await refreshData();
+  renderSeanceNav();
+  showToast("✓ Séance enregistrée !");
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════
+function renderDashboard() {
+  const data = loadData();
+  const sessions = Object.values(data);
+  const totalSessions = sessions.length;
+  const totalWeeks = new Set(sessions.map(s => s.week)).size;
+
+  // Avg hooper
+  const hoopers = sessions.filter(s => s.hooper).map(s => s.hooper.total);
+  const avgHooper = hoopers.length ? Math.round(hoopers.reduce((a,b) => a+b, 0) / hoopers.length) : '—';
+
+  const maxWeeks = Object.keys(PROGRAMME).length;
+  const totalPossible = Object.values(PROGRAMME).reduce((a,p) => a + p.seances.length, 0);
+  const pct = Math.round((totalSessions / totalPossible) * 100);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val">${totalSessions}</div>
+      <div class="stat-lbl">Séances enregistrées</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${totalWeeks}<span style="font-size:18px;color:var(--muted)">/5</span></div>
+      <div class="stat-lbl">Semaines actives</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:${avgHooper < 16 ? '#2A6B35' : avgHooper < 20 ? '#C9932A' : '#B22222'}">${avgHooper}</div>
+      <div class="stat-lbl">Score Hooper moyen</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">${pct}%</div>
+      <div class="stat-lbl">Complétion du cycle</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    </div>
+  `;
+
+  // Key lifts progression
+  const keyLifts = ["Back squat", "Développé couché barre", "Développé militaire", "Tirage vertical"];
+  let chartHtml = '';
+  keyLifts.forEach(lift => {
+    const points = [];
+    sessions.forEach(s => {
+      if (s.weights?.[lift]) points.push({ week: s.week, val: s.weights[lift], date: s.date });
+    });
+    if (!points.length) return;
+    const max = Math.max(...points.map(p => p.val)) * 1.15;
+    const min = Math.min(...points.map(p => p.val)) * 0.85;
+    chartHtml += `
+      <div class="stat-card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:13px;font-weight:500">${lift}</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val} kg</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:4px;height:40px">
+          ${points.map(p => {
+            const h = Math.round(((p.val - min) / (max - min)) * 36) + 4;
+            return `<div title="${p.date}: ${p.val}kg" style="flex:1;height:${h}px;background:var(--red);border-radius:1px;min-width:8px;cursor:pointer"></div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted)">
+          <span>${points[0].week}</span><span>${points[points.length-1].week}</span>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('dash-chart').innerHTML = chartHtml || `<p style="color:var(--muted);font-size:13px">Enregistre des séances pour voir les graphiques.</p>`;
+}
+
+// ═══════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════
+function renderHistory() {
+  const data = loadData();
+  const sessions = Object.values(data).sort((a,b) => (b.week + b.seance).localeCompare(a.week + a.seance));
+  if (!sessions.length) {
+    document.getElementById('history-content').innerHTML = `<p style="color:var(--muted);font-size:13px">Aucune séance enregistrée pour l'instant.</p>`;
+    return;
+  }
+
+  let html = `<table class="history-table"><thead><tr>
+    <th>Date</th><th>Semaine</th><th>Séance</th><th>Hooper</th><th>Charges clés</th>
+  </tr></thead><tbody>`;
+
+  sessions.forEach(s => {
+    const band = s.hooper ? HOOPER_BANDS.find(b => s.hooper.total >= b.min && s.hooper.total <= b.max) : null;
+    const keyW = Object.entries(s.weights || {}).slice(0,2).map(([k,v]) => `${k.split(' ')[0]}: <strong>${v}kg</strong>`).join(' · ');
+    html += `<tr>
+      <td style="color:var(--muted)">${s.date}</td>
+      <td>${s.week}</td>
+      <td style="font-size:11px">${s.label}</td>
+      <td>${band ? `<span class="badge" style="background:${band.bg};color:${band.color}">${s.hooper.total}/28 — ${band.label}</span>` : '—'}</td>
+      <td style="font-size:11px">${keyW || '—'}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>
+    <div style="margin-top:16px;text-align:right">
+      <button onclick="clearData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:6px 12px;cursor:pointer;border-radius:2px">
+        Effacer toutes les données
+      </button>
+    </div>`;
+
+  document.getElementById('history-content').innerHTML = html;
+}
+
+async function clearData() {
+  if (confirm("Effacer toutes les données ? Cette action est irréversible.")) {
+    const { error } = await db.from('sessions').delete().neq('id', 0);
+    if (error) {
+      console.error(error);
+      showToast("Erreur");
+      return;
+    }
+    await refreshData();
+    renderHistory();
+    renderSeanceNav();
+    showToast("Données effacées");
+  }
+}
+</script>
+</body>
+</html>
