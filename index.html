@@ -287,17 +287,33 @@
     color: var(--muted);
     border-bottom: 1px solid var(--border);
   }
+  .exo-item {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .exo-item:last-child { border-bottom: none; }
+  .exo-item:hover { background: var(--surface); }
   .exo-row {
     display: grid;
     grid-template-columns: 1fr 100px 80px 70px 70px 100px;
     gap: 0;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 16px 8px;
     align-items: center;
-    transition: background .15s;
   }
-  .exo-row:last-child { border-bottom: none; }
-  .exo-row:hover { background: var(--surface); }
+  .exo-note-row { padding: 0 16px 10px; }
+  .note-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+    font-style: italic;
+    padding: 6px 10px;
+    border-radius: 2px;
+    transition: border-color .2s;
+  }
+  .note-input::placeholder { color: var(--muted); font-style: italic; }
+  .note-input:focus { outline: none; border-color: var(--orange); background: #252525; }
   .exo-name {
     font-size: 13px;
     font-weight: 500;
@@ -340,8 +356,7 @@
   }
   .drop-set-row {
     background: rgba(255,255,255,.02);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 16px;
+    padding: 10px 16px 6px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -842,6 +857,7 @@ async function refreshData() {
       date: row.date_recorded,
       hooper: row.hooper,
       weights: row.weights,
+      notes: row.notes,
     };
   });
 }
@@ -928,26 +944,37 @@ function renderSeance() {
     </div>`;
 
   seance.exercices.forEach((exo, i) => {
+    const savedNote = saved.notes?.[exo.nom] ?? '';
     if (exo.dropset) {
-      html += `<div class="drop-set-row">
-        <span style="font-size:13px">🔻</span>
-        <span class="drop-set-label">${exo.nom} — ${exo.series} — RPE ${exo.rpe} — Récup ${exo.recup}</span>
+      html += `<div class="exo-item">
+        <div class="drop-set-row">
+          <span style="font-size:13px">🔻</span>
+          <span class="drop-set-label">${exo.nom} — ${exo.series} — RPE ${exo.rpe} — Récup ${exo.recup}</span>
+        </div>
+        <div class="exo-note-row">
+          <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note (ex: 6 reps au lieu de 8...)">
+        </div>
       </div>`;
       return;
     }
     const defaultW = (currentWeek === 'S1' && S1_WEIGHTS['S1']?.[exo.nom]) || '';
     const savedW = saved.weights?.[exo.nom] ?? defaultW;
-    html += `<div class="exo-row">
-      <span class="exo-name">${exo.nom}</span>
-      <span class="exo-meta">${exo.series}</span>
-      <span class="exo-meta col-tempo">${exo.tempo}</span>
-      <span class="exo-meta col-recup">${exo.recup}</span>
-      <span class="exo-rpe">${exo.rpe}</span>
-      <div class="weight-input-wrap">
-        <input type="number" class="weight-input ${savedW ? 'saved' : ''}"
-               id="w_${i}" value="${savedW}" placeholder="—" min="0" step="1.25"
-               oninput="this.classList.remove('saved')">
-        <span class="weight-unit">kg</span>
+    html += `<div class="exo-item">
+      <div class="exo-row">
+        <span class="exo-name">${exo.nom}</span>
+        <span class="exo-meta">${exo.series}</span>
+        <span class="exo-meta col-tempo">${exo.tempo}</span>
+        <span class="exo-meta col-recup">${exo.recup}</span>
+        <span class="exo-rpe">${exo.rpe}</span>
+        <div class="weight-input-wrap">
+          <input type="number" class="weight-input ${savedW ? 'saved' : ''}"
+                 id="w_${i}" value="${savedW}" placeholder="—" min="0" step="1.25"
+                 oninput="this.classList.remove('saved')">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exo-note-row">
+        <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note (ex: 6 reps au lieu de 8...)">
       </div>
     </div>`;
   });
@@ -997,7 +1024,10 @@ async function saveSession() {
   };
 
   const weights = {};
+  const notes = {};
   seance.exercices.forEach((exo, i) => {
+    const noteInput = document.getElementById(`note_${i}`);
+    if (noteInput && noteInput.value.trim()) notes[exo.nom] = noteInput.value.trim();
     if (exo.dropset) return;
     const input = document.getElementById(`w_${i}`);
     if (input && input.value) {
@@ -1014,6 +1044,7 @@ async function saveSession() {
     date_recorded: new Date().toLocaleDateString('fr-FR'),
     hooper,
     weights,
+    notes,
   };
 
   const { error } = await db.from('sessions').upsert(entry, { onConflict: 'athlete,week,seance' });
@@ -1123,12 +1154,16 @@ function renderHistory() {
   sessions.forEach(s => {
     const band = s.hooper ? HOOPER_BANDS.find(b => s.hooper.total >= b.min && s.hooper.total <= b.max) : null;
     const keyW = Object.entries(s.weights || {}).slice(0,2).map(([k,v]) => `${k.split(' ')[0]}: <strong>${v}kg</strong>`).join(' · ');
+    const noteEntries = Object.entries(s.notes || {});
+    const notesHtml = noteEntries.length
+      ? `<div style="margin-top:4px;color:var(--muted);font-style:italic">${noteEntries.map(([k,v]) => `${k.split(' ')[0]}: ${v}`).join(' · ')}</div>`
+      : '';
     html += `<tr>
       <td style="color:var(--muted)">${s.date}</td>
       <td>${s.week}</td>
       <td style="font-size:11px">${s.label}</td>
       <td>${band ? `<span class="badge" style="background:${band.bg};color:${band.color}">${s.hooper.total}/28 — ${band.label}</span>` : '—'}</td>
-      <td style="font-size:11px">${keyW || '—'}</td>
+      <td style="font-size:11px">${keyW || '—'}${notesHtml}</td>
     </tr>`;
   });
 
