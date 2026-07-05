@@ -626,6 +626,7 @@
 const SUPABASE_URL = "https://itubxfyqqpthwpqhbrje.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0dWJ4ZnlxcXB0aHdwcWhicmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjk4NzcsImV4cCI6MjA5ODc0NTg3N30.l_E1eAgVRusOJNHHDGbn3ulEXexYJp25gPUG2_7CGBM";
 const APP_PIN = "2468"; // change ce code si tu veux, partage-le uniquement avec ton athlète
+const ATHLETE = "Jox";
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -826,7 +827,7 @@ if (localStorage.getItem('jox_pin_ok') === '1') {
 // DATA (Supabase)
 // ═══════════════════════════════════════════════════
 async function refreshData() {
-  const { data, error } = await db.from('sessions').select('*');
+  const { data, error } = await db.from('sessions').select('*').eq('athlete', ATHLETE);
   if (error) {
     console.error(error);
     showToast("Erreur de connexion à la base");
@@ -1006,6 +1007,7 @@ async function saveSession() {
   });
 
   const entry = {
+    athlete: ATHLETE,
     week: currentWeek,
     seance: currentSeance,
     label: seance.label,
@@ -1014,7 +1016,7 @@ async function saveSession() {
     weights,
   };
 
-  const { error } = await db.from('sessions').upsert(entry, { onConflict: 'week,seance' });
+  const { error } = await db.from('sessions').upsert(entry, { onConflict: 'athlete,week,seance' });
   if (error) {
     console.error(error);
     showToast("Erreur d'enregistrement");
@@ -1142,7 +1144,7 @@ function renderHistory() {
 
 async function clearData() {
   if (confirm("Effacer toutes les données ? Cette action est irréversible.")) {
-    const { error } = await db.from('sessions').delete().neq('id', 0);
+    const { error } = await db.from('sessions').delete().eq('athlete', ATHLETE);
     if (error) {
       console.error(error);
       showToast("Erreur");
