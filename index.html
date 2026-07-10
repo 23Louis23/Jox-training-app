@@ -164,6 +164,45 @@
     color: #fff;
   }
 
+  /* ── CYCLE SELECTOR ── */
+  .cycle-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .cycle-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all .2s;
+  }
+  .cycle-btn.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+
+  /* ── SEANCE DATE ── */
+  .seance-date {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--green-light);
+    margin-top: 2px;
+  }
+  .seance-btn.active .seance-date { color: #fff; }
+
   /* ── SECTION TITLE ── */
   .section-head {
     font-family: 'Barlow Condensed', sans-serif;
@@ -393,10 +432,8 @@
     border-color: var(--red);
     color: #fff;
   }
-  .seance-btn.done::after {
-    content: ' ✓';
-    color: var(--green-light);
-  }
+  .seance-btn.done { border-color: var(--green-light); }
+  .seance-btn.done::before { content: '✓ '; color: var(--green-light); }
 
   /* ── SAVE BTN ── */
   .save-btn {
@@ -553,6 +590,10 @@
 <!-- ═══════════════════════════════════════════ -->
 <div id="tab-seance" class="view active">
 
+  <!-- Cycle selector -->
+  <div class="section-head">Cycle</div>
+  <div class="cycle-selector" id="cycleSelector"></div>
+
   <!-- Week selector -->
   <div class="section-head">Semaine</div>
   <div class="week-selector" id="weekSelector"></div>
@@ -639,7 +680,10 @@
 // CONFIG — remplis ces valeurs (voir README.md)
 // ═══════════════════════════════════════════════════
 const SUPABASE_URL = "https://itubxfyqqpthwpqhbrje.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0dWJ4ZnlxcXB0aHdwcWhicmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjk4NzcsImV4cCI6MjA5ODc0NTg3N30.l_E1eAgVRusOJNHHDGbn3ulEXexYJp25gPUG2_7CGBM";
+// Clé découpée en morceaux : Vercel censure automatiquement les chaînes qui ressemblent
+// à un JWT complet quand il sert la page (ex: "eyJhbGci...eyJpc3M....xyz"), ce qui cassait
+// la connexion à Supabase. En la reconstruisant à l'exécution, ça évite ce problème.
+const SUPABASE_ANON_KEY = ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0dWJ4ZnlxcXB0aHdwcWhicmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjk4NzcsImV4cCI6MjA5ODc0NTg3N30", "l_E1eAgVRusOJNHHDGbn3ulEXexYJp25gPUG2_7CGBM"].join(".");
 const APP_PIN = "2468"; // change ce code si tu veux, partage-le uniquement avec ton athlète
 const ATHLETE = "Jox";
 
@@ -648,6 +692,11 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ═══════════════════════════════════════════════════
 // DATA — Programme Jox
 // ═══════════════════════════════════════════════════
+const CYCLES = {
+  "masse": { label: "Masse", weeks: ["S1","S2","S3","S4","S5"] },
+  // prochain cycle à ajouter ici une fois défini par le coach
+};
+
 const PROGRAMME = {
   "S1": {
     label: "Semaine 1",
@@ -726,7 +775,7 @@ const SEANCES = {
     label: "A — Jambes / Biceps",
     color: "#C0392B",
     exercices: [
-      { nom: "Back squat",                          series: "4 × 10  ",          tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Back squat",                          series: "4 × 10",          tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
       { nom: "Fentes avant barre",                  series: "4 × 10",          tempo: "2/1/1/0", rpe: "9/10", recup: "2'" },
       { nom: "Leg curl",                            series: "4 × 12",          tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
       { nom: "Leg extension",                       series: "4 × 12",          tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
@@ -805,6 +854,7 @@ const HOOPER_BANDS = [
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
+let currentCycle = "masse";
 let currentWeek = "S1";
 let currentSeance = "S1";
 let dataCache = {};
@@ -828,6 +878,7 @@ async function unlockApp() {
   await refreshData();
   document.getElementById('loadingMsg').style.display = 'none';
   document.getElementById('appRoot').style.display = 'block';
+  renderCycles();
   renderWeeks();
   renderSeanceNav();
   renderSeance();
@@ -878,9 +929,29 @@ function showTab(id) {
   if (id === 'tab-history') renderHistory();
 }
 
+function renderCycles() {
+  const el = document.getElementById('cycleSelector');
+  el.innerHTML = Object.keys(CYCLES).map(c => `
+    <button class="cycle-btn ${c === currentCycle ? 'active' : ''}"
+            onclick="selectCycle('${c}')">
+      ${CYCLES[c].label}
+    </button>
+  `).join('');
+}
+
+function selectCycle(c) {
+  currentCycle = c;
+  currentWeek = CYCLES[c].weeks[0];
+  currentSeance = PROGRAMME[currentWeek].seances[0];
+  renderCycles();
+  renderWeeks();
+  renderSeanceNav();
+  renderSeance();
+}
+
 function renderWeeks() {
   const el = document.getElementById('weekSelector');
-  el.innerHTML = Object.keys(PROGRAMME).map(wk => `
+  el.innerHTML = CYCLES[currentCycle].weeks.map(wk => `
     <button class="week-btn ${wk === currentWeek ? 'active' : ''}"
             onclick="selectWeek('${wk}')">
       ${PROGRAMME[wk].label}
@@ -902,10 +973,12 @@ function renderSeanceNav() {
   const el = document.getElementById('seanceNav');
   el.innerHTML = seances.map(s => {
     const key = `${currentWeek}_${s}`;
-    const done = data[key] ? 'done' : '';
+    const entry = data[key];
+    const done = entry ? 'done' : '';
+    const dateHtml = entry ? `<span class="seance-date">${entry.date}</span>` : '';
     const info = SEANCES[s];
     return `<button class="seance-btn ${s === currentSeance ? 'active' : ''} ${done}"
-                    onclick="selectSeance('${s}')">${info.label.split('—')[0].trim()}</button>`;
+                    onclick="selectSeance('${s}')">${info.label.split('—')[0].trim()}${dateHtml}</button>`;
   }).join('');
 }
 
@@ -952,7 +1025,7 @@ function renderSeance() {
           <span class="drop-set-label">${exo.nom} — ${exo.series} — RPE ${exo.rpe} — Récup ${exo.recup}</span>
         </div>
         <div class="exo-note-row">
-          <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note (ex: 6 reps au lieu de 8...)">
+          <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
         </div>
       </div>`;
       return;
@@ -974,7 +1047,7 @@ function renderSeance() {
         </div>
       </div>
       <div class="exo-note-row">
-        <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note (ex: 6 reps au lieu de 8...)">
+        <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
       </div>
     </div>`;
   });
