@@ -191,6 +191,23 @@
     color: #fff;
   }
 
+  /* ── DATE INPUT ── */
+  .date-input {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    color-scheme: dark;
+    width: 100%;
+    max-width: 220px;
+  }
+  .date-input:focus { outline: none; border-color: var(--orange); }
+
   /* ── SEANCE DATE ── */
   .seance-date {
     display: block;
@@ -602,6 +619,10 @@
   <div class="section-head">Séance</div>
   <div class="seance-nav" id="seanceNav"></div>
 
+  <!-- Date -->
+  <div class="section-head">Date de la séance</div>
+  <input type="date" id="seanceDate" class="date-input">
+
   <!-- Hooper -->
   <div class="section-head">Index de Hooper — avant la séance</div>
   <div class="hooper-card">
@@ -852,6 +873,23 @@ const HOOPER_BANDS = [
 ];
 
 // ═══════════════════════════════════════════════════
+// DATE HELPERS
+// ═══════════════════════════════════════════════════
+function todayISO() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function formatDateFr(iso) {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function parseDateFrToISO(fr) {
+  const [d, m, y] = fr.split('/');
+  return `${y}-${m}-${d}`;
+}
+
+// ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
 let currentCycle = "masse";
@@ -994,6 +1032,9 @@ function renderSeance() {
   const key = `${currentWeek}_${currentSeance}`;
   const saved = data[key] || {};
 
+  // Load Date (celle déjà enregistrée, sinon aujourd'hui)
+  document.getElementById('seanceDate').value = saved.date ? parseDateFrToISO(saved.date) : todayISO();
+
   // Load Hooper
   const hooper = saved.hooper || { sommeil: 1, stress: 1, fatigue: 1, douleur: 1 };
   document.getElementById('sl-sommeil').value = hooper.sommeil;
@@ -1114,7 +1155,7 @@ async function saveSession() {
     week: currentWeek,
     seance: currentSeance,
     label: seance.label,
-    date_recorded: new Date().toLocaleDateString('fr-FR'),
+    date_recorded: formatDateFr(document.getElementById('seanceDate').value),
     hooper,
     weights,
     notes,
