@@ -680,7 +680,9 @@
 <div id="tab-dashboard" class="view">
   <div class="section-head">Progression globale</div>
   <div class="dash-grid" id="dash-stats"></div>
-  <div class="section-head">Évolution des charges par séance</div>
+  <div class="section-head">Séance</div>
+  <div class="seance-nav" id="dashSeanceNav"></div>
+  <div class="section-head">Évolution des charges</div>
   <div id="dash-chart"></div>
 </div>
 
@@ -898,6 +900,7 @@ function weekNum(w) {
 let currentCycle = "masse";
 let currentWeek = "S1";
 let currentSeance = "S1";
+let dashSeance = null;
 let dataCache = {};
 
 // ═══════════════════════════════════════════════════
@@ -1221,51 +1224,85 @@ function renderDashboard() {
     </div>
   `;
 
-  // Évolution des charges, regroupée par séance du cycle
+  // Sélecteur de séance : ne liste que les séances qui ont au moins une charge enregistrée
   const seanceCodesOrder = [];
   Object.values(PROGRAMME).forEach(w => w.seances.forEach(code => {
     if (!seanceCodesOrder.includes(code)) seanceCodesOrder.push(code);
   }));
+  const availableCodes = seanceCodesOrder.filter(code => sessions.some(s => s.seance === code));
 
-  let chartHtml = '';
-  seanceCodesOrder.forEach(code => {
-    const codeSessions = sessions.filter(s => s.seance === code).sort((a, b) => weekNum(a.week) - weekNum(b.week));
-    if (!codeSessions.length) return;
-    const def = SEANCES[code];
-    const label = def ? def.label : code;
+  if (!dashSeance || !availableCodes.includes(dashSeance)) {
+    dashSeance = availableCodes[0] || null;
+  }
 
-    let exoOrder = def ? def.exercices.filter(e => !e.dropset).map(e => e.nom) : [];
-    codeSessions.forEach(s => Object.keys(s.weights || {}).forEach(k => { if (!exoOrder.includes(k)) exoOrder.push(k); }));
+  const navEl = document.getElementById('dashSeanceNav');
+  navEl.innerHTML = availableCodes.map(code => {
+    const info = SEANCES[code];
+    const label = info ? info.label.split('—')[0].trim() : code;
+    return `<button class="seance-btn ${code === dashSeance ? 'active' : ''}" onclick="selectDashSeance('${code}')">${label}</button>`;
+  }).join('');
 
-    let seanceCharts = '';
-    exoOrder.forEach(lift => {
-      const points = codeSessions.filter(s => s.weights?.[lift]).map(s => ({ week: s.week, val: s.weights[lift], date: s.date }));
-      if (!points.length) return;
-      const max = Math.max(...points.map(p => p.val)) * 1.15;
-      const min = Math.min(...points.map(p => p.val)) * 0.85;
-      seanceCharts += `
-        <div class="stat-card" style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <span style="font-size:13px;font-weight:500">${lift}</span>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val} kg</span>
-          </div>
-          <div style="display:flex;align-items:flex-end;gap:4px;height:40px">
-            ${points.map(p => {
-              const h = Math.round(((p.val - min) / (max - min)) * 36) + 4;
-              return `<div title="${p.date}: ${p.val}kg" style="flex:1;height:${h}px;background:var(--red);border-radius:1px;min-width:8px;cursor:pointer"></div>`;
-            }).join('')}
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted)">
-            <span>${points[0].week}</span><span>${points[points.length-1].week}</span>
-          </div>
+  renderDashCharts();
+}
+
+function selectDashSeance(code) {
+  dashSeance = code;
+  renderDashboard();
+}
+
+// Petit graphique en courbe SVG, sans dépendance externe
+function buildLineChart(points) {
+  const w = 300, h = 90, padX = 12, padY = 16;
+  const vals = points.map(p => p.val);
+  const max = Math.max(...vals) * 1.08;
+  const min = Math.min(...vals) * 0.92;
+  const range = (max - min) || 1;
+  const stepX = points.length > 1 ? (w - padX * 2) / (points.length - 1) : 0;
+  const coords = points.map((p, i) => ({
+    x: padX + i * stepX,
+    y: h - padY - ((p.val - min) / range) * (h - padY * 2),
+    p,
+  }));
+  const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+  const dots = coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3" fill="#C9932A"><title>${c.p.week} — ${c.p.date} : ${c.p.val}kg</title></circle>`).join('');
+  const labels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 2}" font-size="7" fill="#888880" text-anchor="middle">${c.p.week}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:90px;display:block">
+    <path d="${pathD}" fill="none" stroke="#B22222" stroke-width="2"/>
+    ${dots}
+    ${labels}
+  </svg>`;
+}
+
+function renderDashCharts() {
+  const data = loadData();
+  const sessions = Object.values(data);
+  const chartEl = document.getElementById('dash-chart');
+
+  if (!dashSeance) {
+    chartEl.innerHTML = `<p style="color:var(--muted);font-size:13px">Enregistre des séances pour voir les graphiques.</p>`;
+    return;
+  }
+
+  const codeSessions = sessions.filter(s => s.seance === dashSeance).sort((a, b) => weekNum(a.week) - weekNum(b.week));
+  const def = SEANCES[dashSeance];
+  let exoOrder = def ? def.exercices.filter(e => !e.dropset).map(e => e.nom) : [];
+  codeSessions.forEach(s => Object.keys(s.weights || {}).forEach(k => { if (!exoOrder.includes(k)) exoOrder.push(k); }));
+
+  let html = '';
+  exoOrder.forEach(lift => {
+    const points = codeSessions.filter(s => s.weights?.[lift]).map(s => ({ week: s.week, val: s.weights[lift], date: s.date }));
+    if (!points.length) return;
+    html += `
+      <div class="stat-card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:13px;font-weight:500">${lift}</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val} kg</span>
         </div>
-      `;
-    });
-    if (seanceCharts) {
-      chartHtml += `<div class="section-head" style="margin-top:24px">${label}</div>${seanceCharts}`;
-    }
+        ${buildLineChart(points)}
+      </div>
+    `;
   });
-  document.getElementById('dash-chart').innerHTML = chartHtml || `<p style="color:var(--muted);font-size:13px">Enregistre des séances pour voir les graphiques.</p>`;
+  chartEl.innerHTML = html || `<p style="color:var(--muted);font-size:13px">Aucune charge enregistrée pour cette séance.</p>`;
 }
 
 // ═══════════════════════════════════════════════════
