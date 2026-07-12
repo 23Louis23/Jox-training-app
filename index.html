@@ -410,19 +410,6 @@
     color: var(--muted);
     margin-left: 4px;
   }
-  .drop-set-row {
-    background: rgba(255,255,255,.02);
-    padding: 10px 16px 6px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .drop-set-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
   /* ── SEANCE NAV ── */
   .seance-nav {
     display: flex;
@@ -754,7 +741,7 @@ const SEANCES = {
       { nom: "Leg extension",                   series: "4 × 12", tempo: "2/0/2/0", rpe: "9",    recup: "1'30" },
       { nom: "Pull-over poulie bras tendu",      series: "4 × 12", tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
       { nom: "Biceps curl supination haltère",  series: "4 × 12", tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
-      { nom: "Drop-set biceps corde poulie basse", series: "4 × max (12-15)", tempo: "2/0/2/0", rpe: "10", recup: "1'30", dropset: true },
+      { nom: "Drop-set biceps corde poulie basse", series: "4 × max (12-15)", tempo: "2/0/2/0", rpe: "10", recup: "1'30", dropWeights: 3 },
     ]
   },
   "S2": {
@@ -805,7 +792,7 @@ const SEANCES = {
       { nom: "Calf extension",                      series: "4 × 12",          tempo: "2/0/1/2", rpe: "8",    recup: "1'30" },
       { nom: "Biceps curl supination haltère",      series: "4 × 12",          tempo: "2/0/2/0", rpe: "8",    recup: "1'30" },
       { nom: "Biceps curl machine guidé",           series: "3 × 15",          tempo: "1/0/2/0", rpe: "8",    recup: "1'30" },
-      { nom: "Drop-set biceps corde poulie basse",  series: "4 × max (12-15)", tempo: "2/0/2/0", rpe: "10",   recup: "1'30", dropset: true },
+      { nom: "Drop-set biceps corde poulie basse",  series: "4 × max (12-15)", tempo: "2/0/2/0", rpe: "10",   recup: "1'30", dropWeights: 3 },
     ]
   },
   "B": {
@@ -1065,16 +1052,30 @@ function renderSeance() {
 
   seance.exercices.forEach((exo, i) => {
     const savedNote = saved.notes?.[exo.nom] ?? '';
-    if (exo.dropset) {
+    if (exo.dropWeights) {
+      const savedArr = Array.isArray(saved.weights?.[exo.nom]) ? saved.weights[exo.nom] : [];
+      const weightInputs = Array.from({ length: exo.dropWeights }, (_, di) => {
+        const v = savedArr[di] ?? '';
+        return `<input type="number" class="weight-input ${v !== '' ? 'saved' : ''}"
+                 id="w_${i}_${di}" value="${v}" placeholder="—" min="0" step="1.25"
+                 style="width:28px;font-size:11px;padding:4px 2px;text-align:center"
+                 oninput="this.classList.remove('saved')">`;
+      }).join('');
       html += `<div class="exo-item">
-        <div class="drop-set-row">
-          <span style="font-size:13px">🔻</span>
-          <span class="drop-set-label">${exo.nom} — ${exo.series} — RPE ${exo.rpe} — Récup ${exo.recup}</span>
+      <div class="exo-row">
+        <span class="exo-name">${exo.nom}</span>
+        <span class="exo-meta">${exo.series}</span>
+        <span class="exo-meta col-tempo">${exo.tempo}</span>
+        <span class="exo-meta col-recup">${exo.recup}</span>
+        <span class="exo-rpe">${exo.rpe}</span>
+        <div class="weight-input-wrap" style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end">
+          ${weightInputs}
         </div>
-        <div class="exo-note-row">
-          <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
-        </div>
-      </div>`;
+      </div>
+      <div class="exo-note-row">
+        <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
+      </div>
+    </div>`;
       return;
     }
     const defaultW = (currentWeek === 'S1' && S1_WEIGHTS['S1']?.[exo.nom]) || '';
@@ -1148,7 +1149,18 @@ async function saveSession() {
   seance.exercices.forEach((exo, i) => {
     const noteInput = document.getElementById(`note_${i}`);
     if (noteInput && noteInput.value.trim()) notes[exo.nom] = noteInput.value.trim();
-    if (exo.dropset) return;
+    if (exo.dropWeights) {
+      const arr = Array.from({ length: exo.dropWeights }, (_, di) => {
+        const input = document.getElementById(`w_${i}_${di}`);
+        if (input && input.value) {
+          input.classList.add('saved');
+          return +input.value;
+        }
+        return null;
+      });
+      if (arr.some(v => v !== null)) weights[exo.nom] = arr;
+      return;
+    }
     const input = document.getElementById(`w_${i}`);
     if (input && input.value) {
       weights[exo.nom] = +input.value;
@@ -1287,12 +1299,12 @@ function renderDashCharts() {
 
   const codeSessions = sessions.filter(s => s.seance === dashSeance).sort((a, b) => weekNum(a.week) - weekNum(b.week));
   const def = SEANCES[dashSeance];
-  let exoOrder = def ? def.exercices.filter(e => !e.dropset).map(e => e.nom) : [];
+  let exoOrder = def ? def.exercices.filter(e => !e.dropWeights).map(e => e.nom) : [];
   codeSessions.forEach(s => Object.keys(s.weights || {}).forEach(k => { if (!exoOrder.includes(k)) exoOrder.push(k); }));
 
   let html = '';
   exoOrder.forEach(lift => {
-    const points = codeSessions.filter(s => s.weights?.[lift]).map(s => ({ week: s.week, val: s.weights[lift], date: s.date }));
+    const points = codeSessions.filter(s => typeof s.weights?.[lift] === 'number').map(s => ({ week: s.week, val: s.weights[lift], date: s.date }));
     if (!points.length) return;
     html += `
       <div class="stat-card" style="margin-bottom:12px">
@@ -1324,7 +1336,7 @@ function renderHistory() {
 
   sessions.forEach(s => {
     const band = s.hooper ? HOOPER_BANDS.find(b => s.hooper.total >= b.min && s.hooper.total <= b.max) : null;
-    const keyW = Object.entries(s.weights || {}).slice(0,2).map(([k,v]) => `${k.split(' ')[0]}: <strong>${v}kg</strong>`).join(' · ');
+    const keyW = Object.entries(s.weights || {}).slice(0,2).map(([k,v]) => `${k.split(' ')[0]}: <strong>${Array.isArray(v) ? v.filter(x => x !== null).join('/') : v}kg</strong>`).join(' · ');
     const noteEntries = Object.entries(s.notes || {});
     const notesHtml = noteEntries.length
       ? `<div style="margin-top:4px;color:var(--muted);font-style:italic">${noteEntries.map(([k,v]) => `${k.split(' ')[0]}: ${v}`).join(' · ')}</div>`
