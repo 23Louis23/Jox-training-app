@@ -1252,7 +1252,7 @@ function selectDashSeance(code) {
 
 // Petit graphique en courbe SVG, sans dépendance externe
 function buildLineChart(points) {
-  const w = 300, h = 90, padX = 12, padY = 16;
+  const w = 300, h = 100, padX = 16, padTop = 16, padBottom = 16;
   const vals = points.map(p => p.val);
   const max = Math.max(...vals) * 1.08;
   const min = Math.min(...vals) * 0.92;
@@ -1260,16 +1260,18 @@ function buildLineChart(points) {
   const stepX = points.length > 1 ? (w - padX * 2) / (points.length - 1) : 0;
   const coords = points.map((p, i) => ({
     x: padX + i * stepX,
-    y: h - padY - ((p.val - min) / range) * (h - padY * 2),
+    y: h - padBottom - ((p.val - min) / range) * (h - padTop - padBottom),
     p,
   }));
   const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
   const dots = coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3" fill="#C9932A"><title>${c.p.week} — ${c.p.date} : ${c.p.val}kg</title></circle>`).join('');
-  const labels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 2}" font-size="7" fill="#888880" text-anchor="middle">${c.p.week}</text>`).join('');
-  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:90px;display:block">
+  const valueLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${Math.max(c.y - 6, 8).toFixed(1)}" font-size="8" font-weight="700" fill="#C9932A" text-anchor="middle">${c.p.val}</text>`).join('');
+  const weekLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 2}" font-size="7" fill="#888880" text-anchor="middle">${c.p.week}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:100px;display:block">
     <path d="${pathD}" fill="none" stroke="#B22222" stroke-width="2"/>
     ${dots}
-    ${labels}
+    ${valueLabels}
+    ${weekLabels}
   </svg>`;
 }
 
