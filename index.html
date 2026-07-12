@@ -680,7 +680,7 @@
 <div id="tab-dashboard" class="view">
   <div class="section-head">Progression globale</div>
   <div class="dash-grid" id="dash-stats"></div>
-  <div class="section-head">Évolution des charges — exercices clés</div>
+  <div class="section-head">Évolution des charges par séance</div>
   <div id="dash-chart"></div>
 </div>
 
@@ -887,6 +887,9 @@ function formatDateFr(iso) {
 function parseDateFrToISO(fr) {
   const [d, m, y] = fr.split('/');
   return `${y}-${m}-${d}`;
+}
+function weekNum(w) {
+  return parseInt((w || '').replace(/[^0-9]/g, ''), 10) || 0;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1218,34 +1221,49 @@ function renderDashboard() {
     </div>
   `;
 
-  // Key lifts progression
-  const keyLifts = ["Back squat", "Développé couché barre", "Développé militaire", "Tirage vertical"];
+  // Évolution des charges, regroupée par séance du cycle
+  const seanceCodesOrder = [];
+  Object.values(PROGRAMME).forEach(w => w.seances.forEach(code => {
+    if (!seanceCodesOrder.includes(code)) seanceCodesOrder.push(code);
+  }));
+
   let chartHtml = '';
-  keyLifts.forEach(lift => {
-    const points = [];
-    sessions.forEach(s => {
-      if (s.weights?.[lift]) points.push({ week: s.week, val: s.weights[lift], date: s.date });
+  seanceCodesOrder.forEach(code => {
+    const codeSessions = sessions.filter(s => s.seance === code).sort((a, b) => weekNum(a.week) - weekNum(b.week));
+    if (!codeSessions.length) return;
+    const def = SEANCES[code];
+    const label = def ? def.label : code;
+
+    let exoOrder = def ? def.exercices.filter(e => !e.dropset).map(e => e.nom) : [];
+    codeSessions.forEach(s => Object.keys(s.weights || {}).forEach(k => { if (!exoOrder.includes(k)) exoOrder.push(k); }));
+
+    let seanceCharts = '';
+    exoOrder.forEach(lift => {
+      const points = codeSessions.filter(s => s.weights?.[lift]).map(s => ({ week: s.week, val: s.weights[lift], date: s.date }));
+      if (!points.length) return;
+      const max = Math.max(...points.map(p => p.val)) * 1.15;
+      const min = Math.min(...points.map(p => p.val)) * 0.85;
+      seanceCharts += `
+        <div class="stat-card" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:500">${lift}</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val} kg</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:4px;height:40px">
+            ${points.map(p => {
+              const h = Math.round(((p.val - min) / (max - min)) * 36) + 4;
+              return `<div title="${p.date}: ${p.val}kg" style="flex:1;height:${h}px;background:var(--red);border-radius:1px;min-width:8px;cursor:pointer"></div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted)">
+            <span>${points[0].week}</span><span>${points[points.length-1].week}</span>
+          </div>
+        </div>
+      `;
     });
-    if (!points.length) return;
-    const max = Math.max(...points.map(p => p.val)) * 1.15;
-    const min = Math.min(...points.map(p => p.val)) * 0.85;
-    chartHtml += `
-      <div class="stat-card" style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <span style="font-size:13px;font-weight:500">${lift}</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val} kg</span>
-        </div>
-        <div style="display:flex;align-items:flex-end;gap:4px;height:40px">
-          ${points.map(p => {
-            const h = Math.round(((p.val - min) / (max - min)) * 36) + 4;
-            return `<div title="${p.date}: ${p.val}kg" style="flex:1;height:${h}px;background:var(--red);border-radius:1px;min-width:8px;cursor:pointer"></div>`;
-          }).join('')}
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted)">
-          <span>${points[0].week}</span><span>${points[points.length-1].week}</span>
-        </div>
-      </div>
-    `;
+    if (seanceCharts) {
+      chartHtml += `<div class="section-head" style="margin-top:24px">${label}</div>${seanceCharts}`;
+    }
   });
   document.getElementById('dash-chart').innerHTML = chartHtml || `<p style="color:var(--muted);font-size:13px">Enregistre des séances pour voir les graphiques.</p>`;
 }
