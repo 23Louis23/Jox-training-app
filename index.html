@@ -667,6 +667,8 @@
 <div id="tab-dashboard" class="view">
   <div class="section-head">Progression globale</div>
   <div class="dash-grid" id="dash-stats"></div>
+  <div class="section-head">Cycle</div>
+  <div class="cycle-selector" id="dashCycleNav"></div>
   <div class="section-head">Séance</div>
   <div class="seance-nav" id="dashSeanceNav"></div>
   <div class="section-head">Évolution des charges</div>
@@ -677,7 +679,7 @@
 <!-- TAB: HISTORIQUE                             -->
 <!-- ═══════════════════════════════════════════ -->
 <div id="tab-history" class="view">
-  <div class="section-head">Séances enregistrées</div>
+  <div class="section-head">Suivi charge interne</div>
   <div id="history-content"></div>
 </div>
 
@@ -943,6 +945,7 @@ function weekNum(w) {
 let currentCycle = "masse";
 let currentWeek = "S1";
 let currentSeance = "S1";
+let dashCycle = null;
 let dashSeance = null;
 let dataCache = {};
 
@@ -1257,6 +1260,16 @@ function showToast(msg) {
 // ═══════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════
+function getCycleSeanceCodes(cycle) {
+  const codes = [];
+  CYCLES[cycle].weeks.forEach(wk => {
+    (PROGRAMME[wk]?.seances || []).forEach(code => {
+      if (!codes.includes(code)) codes.push(code);
+    });
+  });
+  return codes;
+}
+
 function renderDashboard() {
   const data = loadData();
   const sessions = Object.values(data);
@@ -1292,12 +1305,19 @@ function renderDashboard() {
     </div>
   `;
 
-  // Sélecteur de séance : ne liste que les séances qui ont au moins une charge enregistrée
-  const seanceCodesOrder = [];
-  Object.values(PROGRAMME).forEach(w => w.seances.forEach(code => {
-    if (!seanceCodesOrder.includes(code)) seanceCodesOrder.push(code);
-  }));
-  const availableCodes = seanceCodesOrder.filter(code => sessions.some(s => s.seance === code));
+  // Sélecteur de cycle : ne liste que les cycles qui ont au moins une séance enregistrée
+  const cyclesWithData = Object.keys(CYCLES).filter(c => getCycleSeanceCodes(c).some(code => sessions.some(s => s.seance === code)));
+  if (!dashCycle || !cyclesWithData.includes(dashCycle)) {
+    dashCycle = cyclesWithData[0] || null;
+  }
+
+  const cycleNavEl = document.getElementById('dashCycleNav');
+  cycleNavEl.innerHTML = cyclesWithData.map(c => `
+    <button class="cycle-btn ${c === dashCycle ? 'active' : ''}" onclick="selectDashCycle('${c}')">${CYCLES[c].label}</button>
+  `).join('');
+
+  // Sélecteur de séance : ne liste que les séances du cycle choisi qui ont au moins une charge enregistrée
+  const availableCodes = dashCycle ? getCycleSeanceCodes(dashCycle).filter(code => sessions.some(s => s.seance === code)) : [];
 
   if (!dashSeance || !availableCodes.includes(dashSeance)) {
     dashSeance = availableCodes[0] || null;
@@ -1311,6 +1331,12 @@ function renderDashboard() {
   }).join('');
 
   renderDashCharts();
+}
+
+function selectDashCycle(c) {
+  dashCycle = c;
+  dashSeance = null;
+  renderDashboard();
 }
 
 function selectDashSeance(code) {
@@ -1337,6 +1363,32 @@ function buildLineChart(points) {
   const weekLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 2}" font-size="7" fill="#888880" text-anchor="middle">${c.p.week}</text>`).join('');
   return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:100px;display:block">
     <path d="${pathD}" fill="none" stroke="#B22222" stroke-width="2"/>
+    ${dots}
+    ${valueLabels}
+    ${weekLabels}
+  </svg>`;
+}
+
+// Petit graphique en courbe SVG pour le score Hooper (échelle fixe 4-28)
+function buildHooperChart(points) {
+  const w = 300, h = 100, padX = 16, padTop = 16, padBottom = 16;
+  const min = 4, max = 28, range = max - min;
+  const stepX = points.length > 1 ? (w - padX * 2) / (points.length - 1) : 0;
+  const coords = points.map((p, i) => ({
+    x: padX + i * stepX,
+    y: h - padBottom - ((p.val - min) / range) * (h - padTop - padBottom),
+    p,
+  }));
+  const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+  const dots = coords.map(c => {
+    const band = HOOPER_BANDS.find(b => c.p.val >= b.min && c.p.val <= b.max);
+    const color = band ? band.color : '#C9932A';
+    return `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3" fill="${color}"><title>${c.p.label} — ${c.p.date} : ${c.p.val}/28${band ? ' — ' + band.label : ''}</title></circle>`;
+  }).join('');
+  const valueLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${Math.max(c.y - 6, 8).toFixed(1)}" font-size="8" font-weight="700" fill="#C9932A" text-anchor="middle">${c.p.val}</text>`).join('');
+  const weekLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 2}" font-size="7" fill="#888880" text-anchor="middle">${c.p.label}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:100px;display:block">
+    <path d="${pathD}" fill="none" stroke="#3d9b4e" stroke-width="2"/>
     ${dots}
     ${valueLabels}
     ${weekLabels}
@@ -1380,40 +1432,33 @@ function renderDashCharts() {
 // ═══════════════════════════════════════════════════
 function renderHistory() {
   const data = loadData();
-  const sessions = Object.values(data).sort((a,b) => (b.week + b.seance).localeCompare(a.week + a.seance));
+  const sessions = Object.values(data)
+    .filter(s => s.hooper)
+    .sort((a,b) => weekNum(a.week) - weekNum(b.week) || a.seance.localeCompare(b.seance));
+
   if (!sessions.length) {
     document.getElementById('history-content').innerHTML = `<p style="color:var(--muted);font-size:13px">Aucune séance enregistrée pour l'instant.</p>`;
     return;
   }
 
-  let html = `<table class="history-table"><thead><tr>
-    <th>Date</th><th>Semaine</th><th>Séance</th><th>Hooper</th><th>Charges clés</th>
-  </tr></thead><tbody>`;
+  const points = sessions.map(s => ({ label: s.week, val: s.hooper.total, date: s.date }));
+  const latest = sessions[sessions.length - 1];
+  const latestBand = HOOPER_BANDS.find(b => latest.hooper.total >= b.min && latest.hooper.total <= b.max);
 
-  sessions.forEach(s => {
-    const band = s.hooper ? HOOPER_BANDS.find(b => s.hooper.total >= b.min && s.hooper.total <= b.max) : null;
-    const keyW = Object.entries(s.weights || {}).slice(0,2).map(([k,v]) => `${k.split(' ')[0]}: <strong>${Array.isArray(v) ? v.filter(x => x !== null).join('/') : v}kg</strong>`).join(' · ');
-    const noteEntries = Object.entries(s.notes || {});
-    const notesHtml = noteEntries.length
-      ? `<div style="margin-top:4px;color:var(--muted);font-style:italic">${noteEntries.map(([k,v]) => `${k.split(' ')[0]}: ${v}`).join(' · ')}</div>`
-      : '';
-    html += `<tr>
-      <td style="color:var(--muted)">${s.date}</td>
-      <td>${s.week}</td>
-      <td style="font-size:11px">${s.label}</td>
-      <td>${band ? `<span class="badge" style="background:${band.bg};color:${band.color}">${s.hooper.total}/28 — ${band.label}</span>` : '—'}</td>
-      <td style="font-size:11px">${keyW || '—'}${notesHtml}</td>
-    </tr>`;
-  });
-
-  html += `</tbody></table>
-    <div style="margin-top:16px;text-align:right">
+  document.getElementById('history-content').innerHTML = `
+    <div class="stat-card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:500">Score Hooper</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:${latestBand ? latestBand.color : 'var(--gold)'}">${latest.hooper.total}/28</span>
+      </div>
+      ${buildHooperChart(points)}
+    </div>
+    <div style="text-align:right">
       <button onclick="clearData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:6px 12px;cursor:pointer;border-radius:2px">
         Effacer toutes les données
       </button>
-    </div>`;
-
-  document.getElementById('history-content').innerHTML = html;
+    </div>
+  `;
 }
 
 async function clearData() {
