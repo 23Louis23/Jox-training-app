@@ -704,6 +704,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ═══════════════════════════════════════════════════
 const CYCLES = {
   "masse": { label: "Masse", weeks: ["S1","S2","S3","S4","S5"] },
+  "conjugate": { label: "Conjugate Force/Masse/Balistique", weeks: ["S6","S7","S8","S9","S10"] },
   // prochain cycle à ajouter ici une fois défini par le coach
 };
 
@@ -728,6 +729,11 @@ const PROGRAMME = {
     label: "Semaine 5",
     seances: ["A","B","C","D","E"]
   },
+  "S6": { label: "Semaine 6", seances: ["1","2","3","4"] },
+  "S7": { label: "Semaine 7", seances: ["1","2","3","4"] },
+  "S8": { label: "Semaine 8", seances: ["1","2","3","4"] },
+  "S9": { label: "Semaine 9", seances: ["1","2","3","4"] },
+  "S10": { label: "Semaine 10", seances: ["1","2","3","4"] },
 };
 
 const SEANCES = {
@@ -843,6 +849,56 @@ const SEANCES = {
       { nom: "Pull over haltère couché",          series: "4 × 10", tempo: "2/0/2/1", rpe: "9",    recup: "1'30" },
       { nom: "Triceps poulie haute derrière soi", series: "4 × 10", tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
       { nom: "Triceps haltères au front",         series: "4 × 12", tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
+    ]
+  },
+  "1": {
+    label: "1 — Force bas du corps + Rugby",
+    color: "#C0392B",
+    exercices: [
+      { nom: "Front squat",                                  series: "4 × 4",       tempo: "/",        rpe: "9/10", recup: "3'30-4'" },
+      { nom: "Fentes marchées (DB Overhead)",                series: "4 × 20m",     tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
+      { nom: "Hip thrust",                                   series: "4 × 10",      tempo: "1/0/1/2",  rpe: "8",    recup: "1'30" },
+      { nom: "Superset : Leg extension/curl",                series: "4 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
+      { nom: "Calf extension unilatéral DB",                 series: "4 × 12",      tempo: "1/0/1/2",  rpe: "8",    recup: "1'30" },
+      { nom: "Superset : machine hip abduction / adduction", series: "3 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
+    ]
+  },
+  "2": {
+    label: "2 — Masse / Renfo haut du corps",
+    color: "#7B1D1D",
+    exercices: [
+      { nom: "Tirage vertical",                                                                     series: "4 × 12",      tempo: "1/0/1/0", rpe: "9/10", recup: "2'" },
+      { nom: "Développé couché",                                                                    series: "4 × 8",       tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
+      { nom: "Pull over poulie haute",                                                              series: "4 × 10",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+      { nom: "Écarté couché haltère",                                                               series: "4 × 10",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+      { nom: "Biset : Élévations latérales / frontales",                                            series: "3 × 12 + 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+      { nom: "Superset : Biceps curl unilatéral alterné haltère / triceps extension corde poulie haute", series: "4 × 10 + 10", tempo: "1/0/1/2", rpe: "8", recup: "1'15" },
+      { nom: "Superset : Biceps curl supination haltère sur banc incliné / triceps barre au front",  series: "4 × 12 + 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'15" },
+    ]
+  },
+  "3": {
+    label: "3 — Balistique + Rugby",
+    color: "#D2691E",
+    exercices: [
+      { nom: "Drop jump",                              series: "4 × 4 sauts (départ 30cm de hauteur + intension hauteur max)", tempo: "/",                     rpe: "/",     recup: "1'" },
+      { nom: "Hang power clean",                       series: "5 × 3",       tempo: "Intension de vitesse ++", rpe: "60%",   recup: "2'30" },
+      { nom: "Split squat haltère",                    series: "3 × 8",       tempo: "1/0/1/0",                 rpe: "7/8",   recup: "1'30" },
+      { nom: "RDL",                                    series: "3 × 8",       tempo: "1/0/1/0",                 rpe: "7/8",   recup: "1'30" },
+      { nom: "Woodchop (poulie hauteur épaule)",       series: "3 × 10/côté", tempo: "3/0/1/0",                 rpe: "7/8",   recup: "1'" },
+      { nom: "Landmine rotation",                      series: "3 × 10",      tempo: "3/0/1/0",                 rpe: "7/8",   recup: "1'" },
+    ]
+  },
+  "4": {
+    label: "4 — Renfo",
+    color: "#7B1D1D",
+    exercices: [
+      { nom: "Développé incliné haltère",                                                     series: "4 × 10",  tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
+      { nom: "Pec fly",                                                                        series: "3 × 12",  tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
+      { nom: "Tirage horizontal",                                                              series: "4 × 10",  tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
+      { nom: "Pull over haltère couché",                                                       series: "4 × 12",  tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
+      { nom: "Oiseau",                                                                          series: "3 × 10",  tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
+      { nom: "Superset : Biceps curl prise marteau / Triceps extension poulie haute de dos",    series: "4 × 12/12", tempo: "1/0/1/0", rpe: "8", recup: "1'" },
+      { nom: "Superset : Biceps barre EZ / triceps extension haltère unilatéral assis",         series: "4 × 10 + 10", tempo: "1/0/1/0", rpe: "8", recup: "1'" },
     ]
   },
 };
@@ -1222,7 +1278,7 @@ function renderDashboard() {
       <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
     </div>
     <div class="stat-card">
-      <div class="stat-val">${totalWeeks}<span style="font-size:18px;color:var(--muted)">/5</span></div>
+      <div class="stat-val">${totalWeeks}<span style="font-size:18px;color:var(--muted)">/${Object.keys(PROGRAMME).length}</span></div>
       <div class="stat-lbl">Semaines actives</div>
     </div>
     <div class="stat-card">
