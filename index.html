@@ -886,8 +886,8 @@ const SEANCES = {
       { nom: "Hang power clean",                       series: "5 × 3",       tempo: "Intension de vitesse ++", rpe: "60%",   recup: "2'30" },
       { nom: "Split squat haltère",                    series: "3 × 8",       tempo: "1/0/1/0",                 rpe: "7/8",   recup: "1'30" },
       { nom: "RDL",                                    series: "3 × 8",       tempo: "1/0/1/0",                 rpe: "7/8",   recup: "1'30" },
-      { nom: "Woodchop (poulie hauteur épaule)",       series: "3 × 10/côté", tempo: "3/0/1/0",                 rpe: "7/8",   recup: "1'" },
-      { nom: "Landmine rotation",                      series: "3 × 10",      tempo: "3/0/1/0",                 rpe: "7/8",   recup: "1'" },
+      { nom: "Woodchop (poulie haute)",                series: "3 × 10/côté", tempo: "3/0/1/0",                 rpe: "7/8",   recup: "1'", video: "https://www.youtube.com/watch?v=iwGH_mOd8X0" },
+      { nom: "Landmine rotation",                      series: "3 × 10",      tempo: "3/0/1/0",                 rpe: "7/8",   recup: "1'", video: "https://www.youtube.com/watch?v=4dGj7rES9pY" },
     ]
   },
   "4": {
@@ -1120,9 +1120,10 @@ function renderSeance() {
                  style="width:28px;font-size:11px;padding:4px 2px;text-align:center"
                  oninput="this.classList.remove('saved')">`;
       }).join('');
+      const videoLinkDrop = exo.video ? ` <a href="${exo.video}" target="_blank" rel="noopener" style="color:var(--orange);font-size:10px;text-decoration:none">▶ vidéo</a>` : '';
       html += `<div class="exo-item">
       <div class="exo-row">
-        <span class="exo-name">${exo.nom}</span>
+        <span class="exo-name">${exo.nom}${videoLinkDrop}</span>
         <span class="exo-meta">${exo.series}</span>
         <span class="exo-meta col-tempo">${exo.tempo}</span>
         <span class="exo-meta col-recup">${exo.recup}</span>
@@ -1139,9 +1140,10 @@ function renderSeance() {
     }
     const defaultW = (currentWeek === 'S1' && S1_WEIGHTS['S1']?.[exo.nom]) || '';
     const savedW = saved.weights?.[exo.nom] ?? defaultW;
+    const videoLink = exo.video ? ` <a href="${exo.video}" target="_blank" rel="noopener" style="color:var(--orange);font-size:10px;text-decoration:none">▶ vidéo</a>` : '';
     html += `<div class="exo-item">
       <div class="exo-row">
-        <span class="exo-name">${exo.nom}</span>
+        <span class="exo-name">${exo.nom}${videoLink}</span>
         <span class="exo-meta">${exo.series}</span>
         <span class="exo-meta col-tempo">${exo.tempo}</span>
         <span class="exo-meta col-recup">${exo.recup}</span>
