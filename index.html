@@ -322,6 +322,20 @@
     text-transform: uppercase;
   }
 
+  /* ── WARMUP CARD ── */
+  .warmup-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .warmup-card strong { color: var(--text); }
+
   /* ── EXERCISE TABLE ── */
   .exo-card {
     background: var(--card);
@@ -654,6 +668,10 @@
     </div>
   </div>
 
+  <!-- Warmup -->
+  <div class="section-head" id="warmup-section-title" style="display:none">Échauffement</div>
+  <div class="warmup-card" id="warmup-card" style="display:none"></div>
+
   <!-- Exercises -->
   <div class="section-head" id="exo-section-title">Exercices</div>
   <div id="exo-list"></div>
@@ -856,6 +874,7 @@ const SEANCES = {
   "1": {
     label: "Force bas du corps",
     color: "#C0392B",
+    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br>— 10/côté ouverture thoracique<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br><strong>Activation :</strong> 2 tours<br>— 6 goblet squat profond léger avec 3’’ pause en bas<br>— 30’’ gainage<br>+ Montée en charge sur front squat",
     exercices: [
       { nom: "Front squat",                                  series: "4 × 4",       tempo: "/",        rpe: "9/10", recup: "3'30-4'" },
       { nom: "Fentes marchées (DB Overhead)",                series: "4 × 20m",     tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
@@ -868,6 +887,7 @@ const SEANCES = {
   "2": {
     label: "Masse haut du corps",
     color: "#7B1D1D",
+    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10 tractions scapula<br>— 10/côté ouverture thoracique<br>— 10 rotation élastique épaule RE1/RE2/RE3<br>— 10/côté antépulsion épaule élastique<br><strong>Activation :</strong> Montée en charge",
     exercices: [
       { nom: "Tirage vertical",                                                                     series: "4 × 12",      tempo: "1/0/1/0", rpe: "9/10", recup: "2'" },
       { nom: "Développé couché",                                                                    series: "4 × 8",       tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
@@ -881,8 +901,9 @@ const SEANCES = {
   "3": {
     label: "Puissance bas du corps",
     color: "#D2691E",
+    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté rotation épaule RE1/RE2/RE3<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br><strong>Activations :</strong> Pogo jump : 2 x 12",
     exercices: [
-      { nom: "Drop jump", series: "4 × 4 sauts (départ 30cm de hauteur + intension hauteur max)", tempo: "/", rpe: "/", recup: "1'", video: "https://youtube.com/shorts/gpXV2dzZ-oA?si=pxbokOTOKXMcR3-H" },
+      { nom: "Drop jump",                              series: "4 × 4 sauts (départ 30cm de hauteur + intension hauteur max)", tempo: "/",                     rpe: "/",     recup: "1'", video: "https://youtube.com/shorts/gpXV2dzZ-oA?si=pxbokOTOKXMcR3-H" },
       { nom: "Hang power clean",                       series: "5 × 3",       tempo: "Intension de vitesse ++", rpe: "60%",   recup: "2'30" },
       { nom: "Split squat haltère",                    series: "3 × 8",       tempo: "1/0/1/0",                 rpe: "7/8",   recup: "1'30" },
       { nom: "RDL",                                    series: "3 × 8",       tempo: "1/0/1/0",                 rpe: "7/8",   recup: "1'30" },
@@ -893,6 +914,7 @@ const SEANCES = {
   "4": {
     label: "Renfo haut du corps",
     color: "#7B1D1D",
+    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10 tractions scapula<br>— 10/côté ouverture thoracique<br>— 10 rotation élastique épaule RE1/RE2/RE3<br>— 10/côté antépulsion épaule élastique<br><strong>Activation :</strong> Montée en charge",
     exercices: [
       { nom: "Développé incliné haltère",                                                     series: "4 × 10",  tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
       { nom: "Pec fly",                                                                        series: "3 × 12",  tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
@@ -1094,6 +1116,17 @@ function renderSeance() {
   document.getElementById('sl-fatigue').value = hooper.fatigue;
   document.getElementById('sl-douleur').value = hooper.douleur;
   updateHooper();
+
+  const warmupTitleEl = document.getElementById('warmup-section-title');
+  const warmupCardEl = document.getElementById('warmup-card');
+  if (seance.warmup) {
+    warmupTitleEl.style.display = '';
+    warmupCardEl.style.display = '';
+    warmupCardEl.innerHTML = seance.warmup;
+  } else {
+    warmupTitleEl.style.display = 'none';
+    warmupCardEl.style.display = 'none';
+  }
 
   document.getElementById('exo-section-title').textContent = `Exercices — ${seance.label}`;
 
