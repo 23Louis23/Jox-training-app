@@ -802,7 +802,7 @@ const SEANCES = {
       { nom: "Développé incliné barre",                series: "4 × 10",   tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
       { nom: "Développé couché haltères",              series: "4 × 8",    tempo: "2/0/1/0", rpe: "9/10", recup: "2'" },
       { nom: "Écarté poulie haute",                    series: "4 × 10",   tempo: "3/0/2/0", rpe: "9",    recup: "1'30" },
-      { nom: "Bi-set : Élévations frontales / lat.",   series: "4 × 10+10",tempo: "2/0/2/1", rpe: "9",    recup: "1'30" },
+      { nom: "Bi-set : Élévations frontales / lat.",   series: "4 × 10+10",tempo: "2/0/2/1", rpe: "9",    recup: "1'30", superset: ["Frontales", "Latérales"] },
       { nom: "Triceps poulie haute derrière soi",      series: "4 × 10",   tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
       { nom: "Triceps haltères au front",              series: "4 × 12",   tempo: "2/0/2/1", rpe: "8",    recup: "1'30" },
     ]
@@ -879,9 +879,9 @@ const SEANCES = {
       { nom: "Front squat",                                  series: "4 × 4",       tempo: "/",        rpe: "9/10", recup: "3'30-4'" },
       { nom: "Fentes marchées (DB Overhead)",                series: "4 × 20m",     tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
       { nom: "Hip thrust",                                   series: "4 × 10",      tempo: "1/0/1/2",  rpe: "8",    recup: "1'30" },
-      { nom: "Superset : Leg extension/curl",                series: "4 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
+      { nom: "Superset : Leg extension/curl",                series: "4 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30", superset: ["Leg ext.", "Leg curl"] },
       { nom: "Calf extension unilatéral DB",                 series: "4 × 12",      tempo: "1/0/1/2",  rpe: "8",    recup: "1'30" },
-      { nom: "Superset : machine hip abduction / adduction", series: "3 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
+      { nom: "Superset : machine hip abduction / adduction", series: "3 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30", superset: ["Abduction", "Adduction"] },
     ]
   },
   "2": {
@@ -893,9 +893,9 @@ const SEANCES = {
       { nom: "Développé couché",                                                                    series: "4 × 8",       tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
       { nom: "Pull over poulie haute",                                                              series: "4 × 10",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
       { nom: "Écarté couché haltère",                                                               series: "4 × 10",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
-      { nom: "Biset : Élévations latérales / frontales",                                            series: "3 × 12 + 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
-      { nom: "Superset : Biceps curl unilatéral alterné haltère / triceps extension corde poulie haute", series: "4 × 10 + 10", tempo: "1/0/1/2", rpe: "8", recup: "1'15" },
-      { nom: "Superset : Biceps curl supination haltère sur banc incliné / triceps barre au front",  series: "4 × 12 + 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'15" },
+      { nom: "Biset : Élévations latérales / frontales",                                            series: "3 × 12 + 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30", superset: ["Latérales", "Frontales"] },
+      { nom: "Superset : Biceps curl unilatéral alterné haltère / triceps extension corde poulie haute", series: "4 × 10 + 10", tempo: "1/0/1/2", rpe: "8", recup: "1'15", superset: ["Biceps curl", "Triceps ext."] },
+      { nom: "Superset : Biceps curl supination haltère sur banc incliné / triceps barre au front",  series: "4 × 12 + 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'15", superset: ["Biceps curl", "Triceps front"] },
     ]
   },
   "3": {
@@ -921,8 +921,8 @@ const SEANCES = {
       { nom: "Tirage horizontal",                                                              series: "4 × 10",  tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
       { nom: "Pull over haltère couché",                                                       series: "4 × 12",  tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
       { nom: "Oiseau",                                                                          series: "3 × 10",  tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
-      { nom: "Superset : Biceps curl prise marteau / Triceps extension poulie haute de dos",    series: "4 × 12/12", tempo: "1/0/1/0", rpe: "8", recup: "1'" },
-      { nom: "Superset : Biceps barre EZ / triceps extension haltère unilatéral assis",         series: "4 × 10 + 10", tempo: "1/0/1/0", rpe: "8", recup: "1'" },
+      { nom: "Superset : Biceps curl prise marteau / Triceps extension poulie haute de dos",    series: "4 × 12/12", tempo: "1/0/1/0", rpe: "8", recup: "1'", superset: ["Curl marteau", "Triceps ext."] },
+      { nom: "Superset : Biceps barre EZ / triceps extension haltère unilatéral assis",         series: "4 × 10 + 10", tempo: "1/0/1/0", rpe: "8", recup: "1'", superset: ["Barre EZ", "Triceps ext."] },
     ]
   },
 };
@@ -1144,14 +1144,16 @@ function renderSeance() {
 
   seance.exercices.forEach((exo, i) => {
     const savedNote = saved.notes?.[exo.nom] ?? '';
-    if (exo.dropWeights) {
+    if (exo.dropWeights || exo.superset) {
+      const count = exo.superset ? exo.superset.length : exo.dropWeights;
       const savedArr = Array.isArray(saved.weights?.[exo.nom]) ? saved.weights[exo.nom] : [];
-      const weightInputs = Array.from({ length: exo.dropWeights }, (_, di) => {
+      const weightInputs = Array.from({ length: count }, (_, di) => {
         const v = savedArr[di] ?? '';
-        return `<input type="number" class="weight-input ${v !== '' ? 'saved' : ''}"
+        const label = exo.superset ? `<span style="font-size:9px;color:var(--muted);display:block;text-align:center;margin-bottom:2px">${exo.superset[di]}</span>` : '';
+        return `<div style="display:flex;flex-direction:column;align-items:center">${label}<input type="number" class="weight-input ${v !== '' ? 'saved' : ''}"
                  id="w_${i}_${di}" value="${v}" placeholder="—" min="0" step="1.25"
-                 style="width:28px;font-size:11px;padding:4px 2px;text-align:center"
-                 oninput="this.classList.remove('saved')">`;
+                 style="width:${exo.superset ? '38px' : '28px'};font-size:11px;padding:4px 2px;text-align:center"
+                 oninput="this.classList.remove('saved')"></div>`;
       }).join('');
       const videoLinkDrop = exo.video ? ` <a href="${exo.video}" target="_blank" rel="noopener" style="color:var(--orange);font-size:10px;text-decoration:none">▶ vidéo</a>` : '';
       html += `<div class="exo-item">
@@ -1243,8 +1245,9 @@ async function saveSession() {
   seance.exercices.forEach((exo, i) => {
     const noteInput = document.getElementById(`note_${i}`);
     if (noteInput && noteInput.value.trim()) notes[exo.nom] = noteInput.value.trim();
-    if (exo.dropWeights) {
-      const arr = Array.from({ length: exo.dropWeights }, (_, di) => {
+    if (exo.dropWeights || exo.superset) {
+      const count = exo.superset ? exo.superset.length : exo.dropWeights;
+      const arr = Array.from({ length: count }, (_, di) => {
         const input = document.getElementById(`w_${i}_${di}`);
         if (input && input.value) {
           input.classList.add('saved');
@@ -1442,7 +1445,7 @@ function renderDashCharts() {
 
   const codeSessions = sessions.filter(s => s.seance === dashSeance).sort((a, b) => weekNum(a.week) - weekNum(b.week));
   const def = SEANCES[dashSeance];
-  let exoOrder = def ? def.exercices.filter(e => !e.dropWeights).map(e => e.nom) : [];
+  let exoOrder = def ? def.exercices.filter(e => !e.dropWeights && !e.superset).map(e => e.nom) : [];
   codeSessions.forEach(s => Object.keys(s.weights || {}).forEach(k => { if (!exoOrder.includes(k)) exoOrder.push(k); }));
 
   let html = '';
