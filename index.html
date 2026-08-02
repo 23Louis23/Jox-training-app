@@ -668,6 +668,9 @@
     </div>
   </div>
 
+  <!-- Ressenti -->
+  <input type="text" id="feeling-note" class="note-input" style="margin-bottom:24px" placeholder="Forme du jour en quelques mots">
+
   <!-- Warmup -->
   <div class="section-head" id="warmup-section-title" style="display:none">Échauffement</div>
   <div class="warmup-card" id="warmup-card" style="display:none"></div>
@@ -1117,6 +1120,8 @@ function renderSeance() {
   document.getElementById('sl-douleur').value = hooper.douleur;
   updateHooper();
 
+  document.getElementById('feeling-note').value = saved.notes?.['__ressenti'] ?? '';
+
   const warmupTitleEl = document.getElementById('warmup-section-title');
   const warmupCardEl = document.getElementById('warmup-card');
   if (seance.warmup) {
@@ -1242,6 +1247,9 @@ async function saveSession() {
 
   const weights = {};
   const notes = {};
+  const feelingInput = document.getElementById('feeling-note');
+  if (feelingInput && feelingInput.value.trim()) notes['__ressenti'] = feelingInput.value.trim();
+
   seance.exercices.forEach((exo, i) => {
     const noteInput = document.getElementById(`note_${i}`);
     if (noteInput && noteInput.value.trim()) notes[exo.nom] = noteInput.value.trim();
