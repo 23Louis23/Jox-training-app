@@ -930,6 +930,68 @@ const SEANCES = {
   },
 };
 
+// Programme adapté (blessure tibia) — remplace les séances 1-4 sur les semaines 9 et 10 uniquement.
+const SEANCE_1_BLESSURE = {
+  label: "Pecs / Épaule / Triceps",
+  color: "#7B1D1D",
+  warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10 tractions scapula<br>— 10/côté ouverture thoracique<br>— 10 rotation élastique épaule RE1/RE2/RE3<br>— 10/côté antépulsion épaule élastique<br><strong>Activation :</strong> Montée en charge",
+  exercices: [
+    { nom: "Développé couché barre",                            series: "4 × 4",       tempo: "1/0/1/0", rpe: "9/10", recup: "3'30-4'" },
+    { nom: "Développé incliné haltère",                         series: "4 × 8",       tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
+    { nom: "Écarté poulie haute",                               series: "3 × 12",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30-2'" },
+    { nom: "Triceps extension corde poulie haute",              series: "4 × 10",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+    { nom: "Triceps haltère au front",                          series: "3 × 12",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+    { nom: "Superset : Élévations latérales/frontales",         series: "4 × 10 + 10", tempo: "1/0/1/0", rpe: "8",    recup: "1'30", superset: ["Latérales", "Frontales"] },
+    { nom: "Core",                                              series: "3/4 tours :<br>— 15 Crunch avec plate (banc à abdo)<br>— 15/côté Russian twist (banc à abdo)<br>— 30'' hollow<br>— 30'' rest", tempo: "—", rpe: "—", recup: "—" },
+  ]
+};
+const SEANCE_2_BLESSURE = {
+  label: "Dos + Biceps",
+  color: "#B22222",
+  warmup: "<strong>Mobilité :</strong> 2 tours<br>— 10/côté rotation épaule R1/R2/R3<br>— 10 mobilités dos rond/dos creux<br>— 10 tirage vertical élastique scapula<br>— 10 rotation thoracique<br><strong>Activation :</strong> 2 tours<br>— 10 biceps curl élastique lent<br>— 10 tirage vertical léger",
+  exercices: [
+    { nom: "Tirage vertical",                       series: "4 × 8",  tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
+    { nom: "Tirage horizontal",                     series: "4 × 8",  tempo: "2/0/2/0", rpe: "9/10", recup: "2'" },
+    { nom: "Pull-over bras tendu poulie haute",     series: "4 × 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+    { nom: "Biceps curl barre EZ",                  series: "4 × 10", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+    { nom: "Biceps curl prise marteau",             series: "4 × 10", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+    { nom: "Biceps curl haltère banc incliné",      series: "3 × 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+  ]
+};
+const SEANCE_3_BLESSURE = {
+  label: "Puissance bas du corps",
+  color: "#D2691E",
+  warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté rotation épaule RE1/RE2/RE3<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br><strong>Activations :</strong> Montée en charge Hip thrust",
+  exercices: [
+    { nom: "Hang power clean",                       series: "5 × 5",       tempo: "Intension de vitesse ++", rpe: "60%", recup: "2'30" },
+    { nom: "Hip thrust",                             series: "4 × 6",       tempo: "1/0/x/0",                 rpe: "60%", recup: "2'30" },
+    { nom: "Superset : Leg extension / curl",        series: "4 × 10 + 10", tempo: "1/0/1/0",                 rpe: "7/8", recup: "1'30", superset: ["Leg ext.", "Leg curl"] },
+    { nom: "Calf extension unilatéral haltère",      series: "3 × 12",      tempo: "1/0/1/0",                 rpe: "7/8", recup: "1'30" },
+    { nom: "Woodchop (poulie hauteur épaule)",       series: "3 × 10/côté", tempo: "3/0/1/0",                 rpe: "7/8", recup: "1'", video: "https://www.youtube.com/watch?v=iwGH_mOd8X0" },
+    { nom: "Landmine rotation",                      series: "3 × 10",      tempo: "3/0/1/0",                 rpe: "7/8", recup: "1'", video: "https://www.youtube.com/watch?v=4dGj7rES9pY" },
+  ]
+};
+const SEANCE_4_BLESSURE = {
+  label: "Renfo",
+  color: "#7B1D1D",
+  warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10 tractions scapula<br>— 10/côté ouverture thoracique<br>— 10 rotation élastique épaule RE1/RE2/RE3<br>— 10/côté antépulsion épaule élastique<br><strong>Activation :</strong> Montée en charge DC",
+  exercices: [
+    { nom: "Développé couché haltère",                                                        series: "4 × 10", tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
+    { nom: "Rowing buste penché haltère unilatéral",                                           series: "4 × 10", tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
+    { nom: "Pull over haltère couché",                                                         series: "3 × 12", tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
+    { nom: "Oiseau",                                                                           series: "3 × 10", tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
+    { nom: "Superset : Biceps curl prise marteau / Triceps extension poulie haute de dos",    series: "4 × 12/12", tempo: "1/0/1/0", rpe: "8", recup: "1'", superset: ["Curl marteau", "Triceps ext."] },
+    { nom: "Superset : Biceps barre EZ / triceps extension haltère unilatéral assis",         series: "4 × 10 + 10", tempo: "1/0/1/0", rpe: "8", recup: "1'", superset: ["Barre EZ", "Triceps ext."] },
+  ]
+};
+const SEANCES_BLESSURE = { "1": SEANCE_1_BLESSURE, "2": SEANCE_2_BLESSURE, "3": SEANCE_3_BLESSURE, "4": SEANCE_4_BLESSURE };
+
+// Sur les semaines 9 et 10, la reprise se fait avec le programme adapté (blessure tibia)
+function getSeanceDef(week, code) {
+  if ((week === "S9" || week === "S10") && SEANCES_BLESSURE[code]) return SEANCES_BLESSURE[code];
+  return SEANCES[code];
+}
+
 // Known S1 weights for Jox
 const S1_WEIGHTS = {
   "S1": { "Back squat": 100, "Tirage vertical": 73, "Leg curl": 35, "Leg extension": 73, "Pull-over poulie bras tendu": 50, "Biceps curl supination haltère": 20 },
@@ -1091,7 +1153,7 @@ function renderSeanceNav() {
     const entry = data[key];
     const done = entry ? 'done' : '';
     const dateHtml = entry ? `<span class="seance-date">${entry.date}</span>` : '';
-    const info = SEANCES[s];
+    const info = getSeanceDef(currentWeek, s);
     return `<button class="seance-btn ${s === currentSeance ? 'active' : ''} ${done}"
                     onclick="selectSeance('${s}')">${info.label.split('—')[0].trim()}${dateHtml}</button>`;
   }).join('');
@@ -1104,7 +1166,7 @@ function selectSeance(s) {
 }
 
 function renderSeance() {
-  const seance = SEANCES[currentSeance];
+  const seance = getSeanceDef(currentWeek, currentSeance);
   const data = loadData();
   const key = `${currentWeek}_${currentSeance}`;
   const saved = data[key] || {};
@@ -1234,7 +1296,7 @@ function updateHooper() {
 // SAVE
 // ═══════════════════════════════════════════════════
 async function saveSession() {
-  const seance = SEANCES[currentSeance];
+  const seance = getSeanceDef(currentWeek, currentSeance);
 
   const hooper = {
     sommeil: +document.getElementById('sl-sommeil').value,
