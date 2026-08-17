@@ -335,6 +335,12 @@
     line-height: 1.6;
   }
   .warmup-card strong { color: var(--text); }
+  .exo-series-block {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 16px 10px;
+    line-height: 1.7;
+  }
 
   /* ── EXERCISE TABLE ── */
   .exo-card {
@@ -942,7 +948,7 @@ const SEANCE_1_BLESSURE = {
     { nom: "Triceps extension corde poulie haute",              series: "4 × 10",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
     { nom: "Triceps haltère au front",                          series: "3 × 12",      tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
     { nom: "Superset : Élévations latérales/frontales",         series: "4 × 10 + 10", tempo: "1/0/1/0", rpe: "8",    recup: "1'30", superset: ["Latérales", "Frontales"] },
-    { nom: "Core",                                              series: "3/4 tours :<br>— 15 Crunch avec plate (banc à abdo)<br>— 15/côté Russian twist (banc à abdo)<br>— 30'' hollow<br>— 30'' rest", tempo: "—", rpe: "—", recup: "—" },
+    { nom: "Core",                                              series: "3/4 tours :<br>— 15 Crunch avec plate (banc à abdo)<br>— 15/côté Russian twist (banc à abdo)<br>— 30'' hollow<br>— 30'' rest", tempo: "—", rpe: "—", recup: "—", multilineSeries: true },
   ]
 };
 const SEANCE_2_BLESSURE = {
@@ -1243,10 +1249,12 @@ function renderSeance() {
     const defaultW = (currentWeek === 'S1' && S1_WEIGHTS['S1']?.[exo.nom]) || '';
     const savedW = saved.weights?.[exo.nom] ?? defaultW;
     const videoLink = exo.video ? ` <a href="${exo.video}" target="_blank" rel="noopener" style="color:var(--orange);font-size:10px;text-decoration:none">▶ vidéo</a>` : '';
+    const seriesCell = exo.multilineSeries ? '' : exo.series;
+    const multilineBlock = exo.multilineSeries ? `<div class="exo-series-block">${exo.series}</div>` : '';
     html += `<div class="exo-item">
       <div class="exo-row">
         <span class="exo-name">${exo.nom}${videoLink}</span>
-        <span class="exo-meta">${exo.series}</span>
+        <span class="exo-meta">${seriesCell}</span>
         <span class="exo-meta col-tempo">${exo.tempo}</span>
         <span class="exo-meta col-recup">${exo.recup}</span>
         <span class="exo-rpe">${exo.rpe}</span>
@@ -1257,6 +1265,7 @@ function renderSeance() {
           <span class="weight-unit">kg</span>
         </div>
       </div>
+      ${multilineBlock}
       <div class="exo-note-row">
         <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
       </div>
