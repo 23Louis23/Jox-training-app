@@ -568,13 +568,43 @@
   .toast.show { opacity: 1; }
 
   @media (max-width: 640px) {
-    .exo-header, .exo-row {
-      grid-template-columns: 1fr 70px 60px 50px;
+    /* Sur téléphone, on empile les paramètres en petites étiquettes au lieu
+       du tableau à colonnes fixes, pour que tout reste lisible sans tourner
+       l'écran ni scroller horizontalement. */
+    .exo-header { display: none; }
+    .exo-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      row-gap: 8px;
+      column-gap: 14px;
     }
-    .exo-header .col-tempo,
-    .exo-row .col-tempo,
-    .exo-header .col-recup,
-    .exo-row .col-recup { display: none; }
+    .exo-row .exo-name { width: 100%; }
+    .exo-row .exo-meta,
+    .exo-row .exo-rpe {
+      display: flex !important;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 12px;
+    }
+    .exo-row .exo-meta::before,
+    .exo-row .exo-rpe::before {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: .8;
+    }
+    .exo-row > .exo-meta:not(.col-tempo):not(.col-recup)::before { content: "Séries"; }
+    .exo-row .col-tempo::before { content: "Tempo"; }
+    .exo-row .col-recup::before { content: "Récup"; }
+    .exo-row .exo-rpe::before { content: "RPE"; }
+    .exo-row .weight-input-wrap {
+      width: 100%;
+      order: 99;
+    }
+    .exo-row .weight-input-wrap .weight-input { width: 100px; }
   }
 </style>
 </head>
@@ -942,10 +972,10 @@ const SEANCES = {
   "CS1": {
     label: "Force bas du corps",
     color: "#C0392B",
-    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br>— 10/côté ouverture thoracique<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br><strong>Activation :</strong> 2 tours<br>— 6 goblet squat profond léger avec 3’’ pause en bas<br>— 30’’ gainage<br>+ Montée en charge sur front squat",
+    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br>— 10/côté ouverture thoracique<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br><strong>Activation :</strong> 2 tours<br>— 6 goblet squat profond léger avec 3’’ pause en bas<br>— 30’’ gainage<br>+ Montée en charge sur back squat",
     exercices: [
-      { nom: "Front squat",                                   series: "4 × 4",       tempo: "/",        rpe: "9/10", recup: "3'30-4'" },
-      { nom: "Fentes avant (gauche puis droite)",             series: "4 × 8 + 8",   tempo: "1/0/1/0",  rpe: "8",    recup: "1'30" },
+      { nom: "Back squat",                                    series: "4 × 4",       tempo: "/",        rpe: "9/10", recup: "3'30-4'" },
+      { nom: "Fentes avant (gauche puis droite)",             series: "4 × 8 + 8",   tempo: "1/0/1/0",  rpe: "8",    recup: "1'30-2'" },
       { nom: "Superset : Leg extension/curl",                 series: "4 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30", superset: ["Leg ext.", "Leg curl"] },
       { nom: "Calf extension unilatéral DB",                  series: "3 × 12",      tempo: "1/0/1/2",  rpe: "8",    recup: "1'30" },
       { nom: "Superset : machine hip abduction / adduction",  series: "3 × 10 + 10", tempo: "1/0/1/0",  rpe: "8",    recup: "1'30", superset: ["Abduction", "Adduction"] },
@@ -1050,8 +1080,28 @@ const SEANCE_4_BLESSURE = {
 const SEANCES_BLESSURE = { "1": SEANCE_1_BLESSURE, "2": SEANCE_2_BLESSURE, "3": SEANCE_3_BLESSURE, "4": SEANCE_4_BLESSURE };
 
 // Sur les semaines 9 et 10, la reprise se fait avec le programme adapté (blessure tibia)
+// CS1 (Conjugate suite) — nombre de reps du Back squat, dégressif sur les 4 semaines
+const CS1_BACK_SQUAT_SERIES = { "S11": "4 × 5", "S12": "4 × 4", "S13": "4 × 3", "S14": "4 × 2" };
+// CS2 (Conjugate suite) — semaines où l'ordre Tirage horizontal / Développé couché est inversé
+const CS2_SWAP_WEEKS = ["S12", "S14"];
+
 function getSeanceDef(week, code) {
   if ((week === "S9" || week === "S10") && SEANCES_BLESSURE[code]) return SEANCES_BLESSURE[code];
+
+  if (code === "CS1" && CS1_BACK_SQUAT_SERIES[week]) {
+    const base = SEANCES["CS1"];
+    const exercices = base.exercices.map(e => ({ ...e }));
+    exercices[0].series = CS1_BACK_SQUAT_SERIES[week];
+    return { ...base, exercices };
+  }
+
+  if (code === "CS2" && CS2_SWAP_WEEKS.includes(week)) {
+    const base = SEANCES["CS2"];
+    const exercices = base.exercices.map(e => ({ ...e }));
+    [exercices[0], exercices[1]] = [exercices[1], exercices[0]];
+    return { ...base, exercices };
+  }
+
   return SEANCES[code];
 }
 
