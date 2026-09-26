@@ -765,7 +765,7 @@ const CYCLES = {
   "masse": { label: "Masse", weeks: ["S1","S2","S3","S4","S5"] },
   "conjugate": { label: "Conjugate Force/Masse/Balistique", weeks: ["S6","S7","S8","S9","S10"] },
   "conjugate2": { label: "Conjugate suite", weeks: ["S11","S12","S13","S14"] },
-  "cycle3": { label: "Conjugate : Force pec/dos - Puissance bas", weeks: ["S15","S16","S17","S18"] },
+  "cycle3": { label: "Conjugate : Force pec/dos - Puissance bas", weeks: ["S15","S16","S17","S18","S19"] },
   // prochain cycle à ajouter ici une fois défini par le coach
 };
 
@@ -803,6 +803,7 @@ const PROGRAMME = {
   "S16": { label: "Semaine 16", seances: ["C3A","C3B","C3C","C3D"] },
   "S17": { label: "Semaine 17", seances: ["C3A","C3B","C3C","C3D"] },
   "S18": { label: "Semaine 18", seances: ["C3A","C3B","C3C","C3D"] },
+  "S19": { label: "Semaine 19", seances: ["C3A","C3B","C3C","C3D"] },
 };
 
 const SEANCES = {
@@ -1139,6 +1140,44 @@ const CS1_BACK_SQUAT_SERIES = { "S11": "4 × 5", "S12": "4 × 4", "S13": "4 × 3
 // CS2 (Conjugate suite) — semaines où l'ordre Tirage horizontal / Développé couché est inversé
 const CS2_SWAP_WEEKS = ["S12", "S14"];
 
+// Cycle 3 — tableau de progression des semaines 2 à 5 (S16 à S19).
+// Chaque entrée = [séries, RPE, {champs optionnels}] pour S2, S3, S4, S5. La semaine 1 (S15) reste la séance de base.
+const CYCLE3_WEEKS = ["S15","S16","S17","S18","S19"];
+const CORE_C3 = n => `${n} tours – 45'' récup entre chaque tour :<br>— 10 abdos roulette (ou avec barre + poids si pas de roulette)<br>— 15 Crunch corde poulie<br>— 20 Russian twist banc à abdo avec plate<br>— 1' gainage planche`;
+const DJ_TEMPO = "Temps au sol le plus court possible — la hauteur de box n'augmente que si le temps de contact reste court";
+const CYCLE3_PROG = {
+  "C3A": {
+    "Back squat":                                    [["4 × 8","8"], ["4 × 8 (+2,5 kg)","8"], ["4 × 8","9"], ["4 × 8 (+2,5 kg)","9"]],
+    "Superset : Leg extension / RDL":                [["4 × 8-10 + 8-10","8"], ["4 × 8-10 + 8-10","8"], ["4 × 8-10 + 8-10","9"], ["4 × 8-10 + 8-10","9"]],
+    "Superset : machine hip abduction / adduction":  [["3 × 10-12 + 10-12","8"], ["3 × 10-12 + 10-12","8"], ["3 × 10-12 + 10-12","9"], ["3 × 10-12 + 10-12","9"]],
+    "Développé militaire haltère":                   [["4 × 8-10","8"], ["4 × 8-10","8"], ["4 × 8-10","9"], ["4 × 8-10","9"]],
+    "Superset : Élévations latérales / reverse fly": [["3 × 10-12 + 10-12","8"], ["3 × 10-12 + 10-12","8"], ["3 × 10-12 + 10-12","9"], ["3 × 10-12 + 10-12","9"]],
+    "Core":                                          [[CORE_C3(3),"—"], [CORE_C3(4),"—"], [CORE_C3(4),"—"], [CORE_C3(4),"—"]],
+  },
+  "C3B": {
+    "Superset : Développé couché / Tractions lestées": [["5 × 3 + 4","9"], ["5 × 3 + 4 (+ charge)","9"], ["5 × 2 + 3","9"], ["5 × 2 + 3 (+ charge)","9"]],
+    "Développé incliné haltère":                       [["3 × 10-12","8"], ["3 × 10-12","8"], ["3 × 10-12","9"], ["3 × 10-12","9"]],
+    "Tirage horizontal unilatéral":                    [["4 × 10-12","8"], ["4 × 10-12","8"], ["4 × 10-12","9"], ["4 × 10-12","9"]],
+    "Superset : Pull over poulie haute / Pec fly":     [["3 × 12-15","8"], ["3 × 12-15","8"], ["3 × 12-15","9"], ["3 × 12-15","9"]],
+  },
+  "C3C": {
+    "Deadlift trap bar":                          [["4 × 4","65% RM"], ["4 × 4","70% RM"], ["5 × 3","70% RM"], ["5 × 3","75% RM"]],
+    "Drop jump":                                  [["4 × 4 (+5-10 cm)","/",{tempo:DJ_TEMPO}], ["4 × 4 (+5-10 cm)","/",{tempo:DJ_TEMPO}], ["5 × 3 (même hauteur)","/",{tempo:DJ_TEMPO}], ["5 × 3 (+5 cm)","/",{tempo:DJ_TEMPO}]],
+    "Superset : Split squat haltère / Leg curl":  [["3 × 10/jambe + 12","7/8"], ["3 × 10/jambe + 12","8"], ["3 × 10/jambe + 12","8"], ["3 × 10/jambe + 12","8"]],
+    "Extension GHD":                              [["3 × 12","7/8"], ["3 × 12","8"], ["3 × 12","8"], ["3 × 12","8"]],
+    "Calf extension smith machine":               [["3 × 12","7/8"], ["3 × 12","8"], ["3 × 12","8"], ["3 × 12","8"]],
+    "Pallof press":                               [["3 × 10/côté (+ charge)","7/8"], ["3 × 12/côté","7/8"], ["3 × 12/côté (+ charge)","7/8"], ["3 × 12/côté (+ charge)","7/8"]],
+    "DB hold unilatéral":                         [["3 × 35''/côté","7/8"], ["3 × 40''/côté","7/8"], ["3 × 45''/côté","7/8"], ["3 × 50''/côté","7/8"]],
+  },
+  "C3D": {
+    "Superset : Biceps curl banc incliné / Triceps corde poulie basse":      [["3 × 10-12 + 10-12","8"], ["3 × 10-12 + 10-12","8-9"], ["3 × 10-12 + 10-12","9"], ["3 × 10-12 + 10-12","9"]],
+    "Superset : Biceps marteau haltère alterné / Triceps barre EZ au front": [["3 × 10-12 + 10-12","8"], ["3 × 10-12 + 10-12","8-9"], ["3 × 10-12 + 10-12","9"], ["3 × 10-12 + 10-12","9"]],
+    "Superset : Biceps curl barre EZ / Triceps poulie haute unilatéral":     [["3 × 8-10 + 8-10","8"], ["3 × 8-10 + 8-10","8-9"], ["3 × 8-10 + 8-10","9"], ["3 × 8-10 + 8-10","9"]],
+    "Drop-set (x3) : Biceps curl corde poulie basse":                        [["3 × 12 + max + max","10"], ["4 × 12 + max + max","10"], ["4 × 12 + max + max","10"], ["4 × 12 + max + max","10"]],
+    "Drop-set (x3) : Triceps corde poulie haute":                            [["3 × 12 + max + max","10"], ["4 × 12 + max + max","10"], ["4 × 12 + max + max","10"], ["4 × 12 + max + max","10"]],
+  },
+};
+
 function getSeanceDef(week, code) {
   if ((week === "S9" || week === "S10") && SEANCES_BLESSURE[code]) return SEANCES_BLESSURE[code];
 
@@ -1154,6 +1193,20 @@ function getSeanceDef(week, code) {
     const exercices = base.exercices.map(e => ({ ...e }));
     [exercices[0], exercices[1]] = [exercices[1], exercices[0]];
     return { ...base, exercices };
+  }
+
+  if (CYCLE3_PROG[code]) {
+    const wi = CYCLE3_WEEKS.indexOf(week);
+    if (wi >= 1) {
+      const base = SEANCES[code];
+      const exercices = base.exercices.map(e => {
+        const o = CYCLE3_PROG[code][e.nom];
+        if (!o) return e;
+        const [series, rpe, extra] = o[wi - 1];
+        return { ...e, series, rpe, ...(extra || {}) };
+      });
+      return { ...base, exercices };
+    }
   }
 
   return SEANCES[code];
