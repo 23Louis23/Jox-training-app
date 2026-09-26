@@ -1057,7 +1057,7 @@ const SEANCES = {
     warmup: "<strong>Échauffement :</strong> 3’ vélo (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 10 pas/côté monster walk<br>— 10 glute bridge<br>— 30’’ gainage<br>— 15 montées sur pointe de pied<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br><strong>Potentialisation :</strong><br>— Pogo jump : 2 × 10<br>— Squat jump à vide : 2 × 5",
     exercices: [
       { nom: "Deadlift trap bar",                                series: "4 × 4",       tempo: "Intention de vitesse ++",                                  rpe: "60% RM", recup: "2'30" },
-      { nom: "Drop jump",                                        series: "4 × 4",       tempo: "Temps au sol le plus court possible + hauteur max",         rpe: "/",      recup: "2'" },
+      { nom: "Drop jump",                                        series: "4 × 4",       tempo: "Temps au sol le plus bref possible + hauteur max",         rpe: "/",      recup: "2'" },
       { nom: "Superset : Split squat haltère / Leg curl",        series: "3 × 10 + 12", tempo: "1/0/1/0", rpe: "7/8", recup: "1'30", superset: ["Split squat", "Leg curl"] },
       { nom: "Extension GHD",                                    series: "3 × 12",      tempo: "1/0/1/0", rpe: "7/8", recup: "1'30" },
       { nom: "Calf extension smith machine",                     series: "3 × 12",      tempo: "1/0/1/0", rpe: "7/8", recup: "1'30" },
@@ -1144,7 +1144,7 @@ const CS2_SWAP_WEEKS = ["S12", "S14"];
 // Chaque entrée = [séries, RPE, {champs optionnels}] pour S2, S3, S4, S5. La semaine 1 (S15) reste la séance de base.
 const CYCLE3_WEEKS = ["S15","S16","S17","S18","S19"];
 const CORE_C3 = n => `${n} tours – 45'' récup entre chaque tour :<br>— 10 abdos roulette (ou avec barre + poids si pas de roulette)<br>— 15 Crunch corde poulie<br>— 20 Russian twist banc à abdo avec plate<br>— 1' gainage planche`;
-const DJ_TEMPO = "Temps au sol le plus court possible — la hauteur de box n'augmente que si le temps de contact reste court";
+const DJ_TEMPO = "Temps au sol le plus bref possible + hauteur max";
 const CYCLE3_PROG = {
   "C3A": {
     "Back squat":                                    [["4 × 8","8"], ["4 × 8 (+2,5 kg)","8"], ["4 × 8","9"], ["4 × 8 (+2,5 kg)","9"]],
