@@ -1029,40 +1029,39 @@ const SEANCES = {
   "C3A": {
     label: "Renfo jambes/épaules",
     color: "#C0392B",
-    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br>— 10/côté ouverture thoracique<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br><strong>Activation :</strong> 2 tours<br>— 6 goblet squat profond léger avec 3’’ pause en bas<br>— 30’’ gainage<br>+ Montée en charge sur back squat",
+    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 10 pas/côté monster walk<br>— 10 glute bridge<br>— 15 montées sur pointe de pied<br>— 10 pull apart élastique<br>— 30’’ gainage<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br>— 10/côté ouverture thoracique<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br><strong>Potentialisation :</strong> Montée en charge sur back squat",
     exercices: [
-      { nom: "Back squat",                                       series: "4 × 8",       tempo: "/",       rpe: "8", recup: "2'" },
+      { nom: "Back squat",                                       series: "4 × 8",       tempo: "/",       rpe: "8", recup: "2'-2'30" },
       { nom: "Superset : Leg extension / RDL",                   series: "4 × 8 + 8",   tempo: "1/0/1/0", rpe: "8", recup: "1'30", superset: ["Leg ext.", "RDL"] },
       { nom: "Superset : machine hip abduction / adduction",     series: "3 × 10 + 10", tempo: "1/0/1/0", rpe: "8", recup: "1'30", superset: ["Abduction", "Adduction"] },
-      { nom: "Superset : Élévations latérales / frontales",      series: "3 × 10 + 10", tempo: "1/0/1/2", rpe: "8", recup: "1'30", superset: ["Latérales", "Frontales"] },
-      { nom: "Oiseau",                                           series: "3 × 12",      tempo: "1/0/1/0", rpe: "8", recup: "1'30" },
+      { nom: "Développé militaire haltère",                      series: "4 × 10",      tempo: "1/0/1/0", rpe: "8", recup: "1'30-2'" },
+      { nom: "Superset : Élévations latérales / reverse fly",    series: "3 × 10 + 10", tempo: "1/0/1/2", rpe: "8", recup: "1'30", superset: ["Latérales", "Reverse fly"] },
       { nom: "Core",                                             series: "3 tours – 45'' récup entre chaque tour :<br>— 10 abdos roulette (ou avec barre + poids si pas de roulette)<br>— 15 Crunch corde poulie<br>— 20 Russian twist banc à abdo avec plate<br>— 1' gainage planche", tempo: "—", rpe: "—", recup: "—", multilineSeries: true },
     ]
   },
   "C3B": {
     label: "Force haut du corps",
     color: "#7B1D1D",
-    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10 tractions scapula<br>— 10/côté ouverture thoracique<br>— 10 rotation élastique épaule RE1/RE2/RE3<br>— 10/côté antépulsion épaule élastique<br><strong>Activation :</strong> Montée en charge DC",
+    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 15 pull apart élastique<br>— 10 rotation externe élastique<br>— 10 pompes scapula<br>— 10 tractions scapula<br>— 30’’ gainage<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté ouverture thoracique<br>— 10/côté rétropulsion épaule élastique<br><strong>Potentialisation :</strong> Montée en charge DC",
     exercices: [
-      { nom: "Développé couché",              series: "4 × 4",  tempo: "1/0/1/0", rpe: "9/10", recup: "3'30-4'" },
-      { nom: "Tractions lestées",             series: "4 × 5",  tempo: "1/0/1/0", rpe: "9/10", recup: "3'30" },
-      { nom: "Pull over poulie haute",        series: "3 × 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
-      { nom: "Développé incliné haltère",     series: "3 × 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
-      { nom: "Pec fly",                       series: "3 × 12", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
-      { nom: "Tirage horizontal unilatéral",  series: "4 × 10", tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+      { nom: "Superset : Développé couché / Tractions lestées",  series: "4 × 4 + 5",  tempo: "1/0/1/0", rpe: "9/10", recup: "2' après le DC + 2' après tractions", superset: ["Dév. couché", "Tractions"] },
+      { nom: "Développé incliné haltère",                        series: "3 × 12",     tempo: "1/0/1/0", rpe: "8",    recup: "1'30-2'" },
+      { nom: "Tirage horizontal unilatéral",                     series: "4 × 10",     tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
+      { nom: "Superset : Pull over poulie haute / Pec fly",      series: "3 × 12",     tempo: "1/0/1/0", rpe: "8",    recup: "1'30", superset: ["Pull over", "Pec fly"] },
     ]
   },
   "C3C": {
     label: "Puissance bas du corps",
     color: "#D2691E",
-    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Mobilité :</strong> 2 tours<br>— 10/côté rotation épaule RE1/RE2/RE3<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br><strong>Activations :</strong> Pogo jump : 2 x 12, Squat jump à vide : 2 x 8",
+    warmup: "<strong>Échauffement :</strong> 3’ vélo (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 10 pas/côté monster walk<br>— 10 glute bridge<br>— 30’’ gainage<br>— 15 montées sur pointe de pied<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br><strong>Potentialisation :</strong><br>— Pogo jump : 2 × 10<br>— Squat jump à vide : 2 × 5",
     exercices: [
-      { nom: "Squat jump",                            series: "4 × 4",       tempo: "Intension de vitesse ++",                           rpe: "60%", recup: "2'30" },
-      { nom: "Broad jump",                            series: "4 × 5",       tempo: "Plus loin possible + qualité d'atterrissage",       rpe: "/",   recup: "2'" },
-      { nom: "Split squat haltère",                   series: "3 × 10",      tempo: "1/0/1/0", rpe: "7/8", recup: "1'30" },
-      { nom: "Leg curl",                              series: "3 × 12",      tempo: "1/0/1/0", rpe: "7/8", recup: "1'30" },
-      { nom: "Woodchop (poulie hauteur épaule)",      series: "3 × 10/côté", tempo: "3/0/1/0", rpe: "7/8", recup: "1'", video: "https://www.youtube.com/watch?v=iwGH_mOd8X0" },
-      { nom: "Landmine rotation",                     series: "3 × 10/côté", tempo: "3/0/1/0", rpe: "7/8", recup: "1'", video: "https://www.youtube.com/watch?v=4dGj7rES9pY" },
+      { nom: "Deadlift trap bar",                                series: "4 × 4",       tempo: "Intention de vitesse ++",                                  rpe: "60% RM", recup: "2'30" },
+      { nom: "Drop jump",                                        series: "4 × 4",       tempo: "Temps au sol le plus court possible + hauteur max",         rpe: "/",      recup: "2'", video: "https://youtube.com/shorts/gpXV2dzZ-oA?si=pxbokOTOKXMcR3-H" },
+      { nom: "Superset : Split squat haltère / Leg curl",        series: "3 × 10 + 12", tempo: "1/0/1/0", rpe: "7/8", recup: "1'30", superset: ["Split squat", "Leg curl"] },
+      { nom: "Extension GHD",                                    series: "3 × 12",      tempo: "1/0/1/0", rpe: "7/8", recup: "1'30" },
+      { nom: "Calf extension smith machine",                     series: "3 × 12",      tempo: "1/0/1/0", rpe: "7/8", recup: "1'30" },
+      { nom: "Pallof press",                                     series: "3 × 10/côté", tempo: "1/0/3/0", rpe: "7/8", recup: "1'" },
+      { nom: "DB hold unilatéral",                               series: "3 × 30''/côté", tempo: "/",     rpe: "7/8", recup: "1'" },
     ]
   },
   "C3D": {
@@ -1072,8 +1071,8 @@ const SEANCES = {
       { nom: "Superset : Biceps curl banc incliné / Triceps corde poulie basse",       series: "3 × 12 + 12", tempo: "/", rpe: "8",  recup: "1'15", superset: ["Biceps curl", "Triceps corde"] },
       { nom: "Superset : Biceps marteau haltère alterné / Triceps barre EZ au front",  series: "3 × 12 + 12", tempo: "/", rpe: "8",  recup: "1'15", superset: ["Curl marteau", "Triceps front"] },
       { nom: "Superset : Biceps curl barre EZ / Triceps poulie haute unilatéral",      series: "3 × 10 + 10", tempo: "/", rpe: "8",  recup: "1'15", superset: ["Barre EZ", "Triceps ext."] },
-      { nom: "Drop-set (x3) : Biceps curl corde poulie basse",                         series: "4 × 12+",     tempo: "/", rpe: "10", recup: "2'", dropWeights: 3 },
-      { nom: "Drop-set (x3) : Triceps corde poulie haute",                             series: "4 × 12+",     tempo: "/", rpe: "10", recup: "2'", dropWeights: 3 },
+      { nom: "Drop-set (x3) : Biceps curl corde poulie basse",                         series: "3 × 12 + max + max", tempo: "/", rpe: "10", recup: "2'", dropWeights: 3 },
+      { nom: "Drop-set (x3) : Triceps corde poulie haute",                             series: "3 × 12 + max + max", tempo: "/", rpe: "10", recup: "2'", dropWeights: 3 },
     ]
   },
 };
