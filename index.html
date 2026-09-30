@@ -1211,6 +1211,16 @@ function getSeanceDef(week, code) {
     return { ...base, exercices: [...CYCLE3_S1_TEST_3RM, ...base.exercices.slice(1)] };
   }
 
+  if (code === "C3C" && week === "S15") {
+    const base = SEANCES["C3C"];
+    const exercices = base.exercices.map(e => e.nom === "Deadlift trap bar" ? {
+      ...e,
+      series: "3 essais (test VBT — encodeur de vitesse)",
+      superset: ["1 : poids (kg)", "1 : V max (m/s)", "2 : poids (kg)", "2 : V max (m/s)", "3 : poids (kg)", "3 : V max (m/s)"],
+    } : e);
+    return { ...base, exercices };
+  }
+
   if (CYCLE3_PROG[code]) {
     const wi = CYCLE3_WEEKS.indexOf(week);
     if (wi >= 1) {
