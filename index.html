@@ -1302,10 +1302,25 @@ function checkPin() {
   }
 }
 
+// À l'ouverture : se placer sur la séance qui suit la dernière séance enregistrée
+// (dans l'ordre du programme : cycles, puis semaines, puis séances).
+function goToNextSeance() {
+  const order = [];
+  Object.keys(CYCLES).forEach(c => CYCLES[c].weeks.forEach(wk => PROGRAMME[wk].seances.forEach(code => order.push({ c, wk, code }))));
+  let lastDone = -1;
+  order.forEach((o, i) => { if (dataCache[`${o.wk}_${o.code}`]) lastDone = i; });
+  if (lastDone < 0) return;
+  const next = order[Math.min(lastDone + 1, order.length - 1)];
+  currentCycle = next.c;
+  currentWeek = next.wk;
+  currentSeance = next.code;
+}
+
 async function unlockApp() {
   document.getElementById('pinGate').style.display = 'none';
   document.getElementById('loadingMsg').style.display = 'flex';
   await refreshData();
+  goToNextSeance();
   document.getElementById('loadingMsg').style.display = 'none';
   document.getElementById('appRoot').style.display = 'block';
   renderCycles();
