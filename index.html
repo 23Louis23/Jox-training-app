@@ -1045,7 +1045,8 @@ const SEANCES = {
     color: "#7B1D1D",
     warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 15 pull apart élastique<br>— 10 rotation externe élastique<br>— 10 pompes scapula<br>— 10 tractions scapula<br>— 30’’ gainage<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté ouverture thoracique<br>— 10/côté rétropulsion épaule élastique<br><strong>Potentialisation :</strong> Montée en charge DC",
     exercices: [
-      { nom: "Superset : Développé couché / Tractions lestées",  series: "4 × 4 + 5",  tempo: "1/0/1/0", rpe: "9/10", recup: "2' après le DC + 2' après tractions", superset: ["Dév. couché", "Tractions"] },
+      { nom: "Développé couché",                                 series: "4 × 4",      tempo: "1/0/1/0", rpe: "9/10", recup: "3'30-4'" },
+      { nom: "Tractions lestées",                                series: "4 × 5",      tempo: "1/0/1/0", rpe: "9/10", recup: "3'30-4'" },
       { nom: "Développé incliné haltère",                        series: "3 × 12",     tempo: "1/0/1/0", rpe: "8",    recup: "1'30-2'" },
       { nom: "Tirage horizontal unilatéral",                     series: "4 × 10",     tempo: "1/0/1/0", rpe: "8",    recup: "1'30" },
       { nom: "Superset : Pull over poulie haute / Pec fly",      series: "3 × 12",     tempo: "1/0/1/0", rpe: "8",    recup: "1'30", superset: ["Pull over", "Pec fly"] },
@@ -1161,11 +1162,17 @@ const CYCLE3_PROG = {
     "Core":                                          [[CORE_C3(3),"—"], [CORE_C3(4),"—"], [CORE_C3(4),"—"], [CORE_C3(4),"—"]],
   },
   "C3B": {
-    "Superset : Développé couché / Tractions lestées": [
-      ["5 × 3 + 4","9",{detail:"Objectif : 95 kg au DC · 15 kg aux tractions lestées"}],
-      ["5 × 3 + 4 (+ charge)","9",{detail:"Objectif : 97,5 kg au DC · 17,5 kg aux tractions lestées"}],
-      ["5 × 2 + 3","9",{detail:"Objectif : 100-102,5 kg au DC · 17,5 ou 20 kg si tenable aux tractions lestées"}],
-      ["5 × 2 + 3 (+ charge)","9",{detail:"Objectif : 102,5-105 kg au DC · 20 kg ou + aux tractions lestées"}],
+    "Développé couché": [
+      ["5 × 3","9",{detail:"Objectif : 95 kg"}],
+      ["5 × 3 (+ charge)","9",{detail:"Objectif : 97,5 kg"}],
+      ["5 × 2","9",{detail:"Objectif : 100-102,5 kg"}],
+      ["5 × 2 (+ charge)","9",{detail:"Objectif : 102,5-105 kg"}],
+    ],
+    "Tractions lestées": [
+      ["5 × 4","9",{detail:"Objectif : 15 kg"}],
+      ["5 × 4 (+ charge)","9",{detail:"Objectif : 17,5 kg"}],
+      ["5 × 3","9",{detail:"Objectif : 17,5 ou 20 kg si tenable"}],
+      ["5 × 3 (+ charge)","9",{detail:"Objectif : 20 kg ou +"}],
     ],
     "Développé incliné haltère":                       [["3 × 10-12","8"], ["3 × 10-12","8"], ["3 × 10-12","9"], ["3 × 10-12","9"]],
     "Tirage horizontal unilatéral":                    [["4 × 10-12","8"], ["4 × 10-12","8"], ["4 × 10-12","9"], ["4 × 10-12","9"]],
@@ -1208,7 +1215,7 @@ function getSeanceDef(week, code) {
 
   if (code === "C3B" && week === "S15") {
     const base = SEANCES["C3B"];
-    return { ...base, exercices: [...CYCLE3_S1_TEST_3RM, ...base.exercices.slice(1)] };
+    return { ...base, exercices: [...CYCLE3_S1_TEST_3RM, ...base.exercices.slice(2)] };
   }
 
   if (code === "C3C" && week === "S15") {
@@ -1507,6 +1514,7 @@ function renderSeance() {
         </div>
       </div>
       ${multilineBlock}
+      ${exo.detail ? `<div class="exo-series-block">${exo.detail}</div>` : ''}
       <div class="exo-note-row">
         <input type="text" class="note-input" id="note_${i}" value="${savedNote}" placeholder="Note">
       </div>
