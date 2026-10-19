@@ -1810,6 +1810,9 @@ function renderDashCharts() {
 
   // Une série de points par "ligne" de suivi : un exercice simple = 1 courbe,
   // un exercice en superset / drop-set = 1 courbe distincte par case de poids.
+  // Semaine 1 de la séance Force : le test 3RM alimente directement la courbe du DC / des tractions
+  // (le back-off n'est pas tracé) ; ensuite la courbe continue avec les charges de travail.
+  const ALIAS_3RM = { "Développé couché — test 3RM": "Développé couché", "Tractions lestées — test 3RM": "Tractions lestées" };
   const series = new Map();
   const addSeries = (key, title, sub, unit) => { if (!series.has(key)) series.set(key, { title, sub, unit, points: [] }); return series.get(key); };
 
@@ -1820,6 +1823,7 @@ function renderDashCharts() {
     const def = getSeanceDef(wk, dashSeance);
     (def?.exercices || []).forEach(exo => {
       if (exo.multilineSeries) return;
+      if (ALIAS_3RM[exo.nom]) { addSeries(`${ALIAS_3RM[exo.nom]}||0`, ALIAS_3RM[exo.nom], '', 'kg'); return; }
       if (exo.superset || exo.dropWeights) {
         const labels = exo.superset || Array.from({ length: exo.dropWeights }, (_, i) => `Charge ${i + 1}`);
         labels.forEach((lab, i) => addSeries(`${exo.nom}||s${i}`, lab, exo.nom, /m\/s/.test(lab) ? 'm/s' : 'kg'));
@@ -1831,6 +1835,10 @@ function renderDashCharts() {
 
   codeSessions.forEach(s => {
     Object.entries(s.weights || {}).forEach(([nom, val]) => {
+      if (ALIAS_3RM[nom]) {
+        if (typeof val[0] === 'number') addSeries(`${ALIAS_3RM[nom]}||0`, ALIAS_3RM[nom], '', 'kg').points.push({ week: s.week, val: val[0], date: s.date });
+        return;
+      }
       if (Array.isArray(val)) {
         val.forEach((v, i) => {
           if (typeof v !== 'number') return;
