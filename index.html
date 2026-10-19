@@ -1726,7 +1726,7 @@ function selectDashSeance(code) {
 }
 
 // Petit graphique en courbe SVG, sans dépendance externe
-function buildLineChart(points) {
+function buildLineChart(points, unit = 'kg') {
   const w = 300, h = 100, padX = 16, padTop = 16, padBottom = 16;
   const vals = points.map(p => p.val);
   const max = Math.max(...vals) * 1.08;
@@ -1739,7 +1739,7 @@ function buildLineChart(points) {
     p,
   }));
   const pathD = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
-  const dots = coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3" fill="#C9932A"><title>${c.p.week} — ${c.p.date} : ${c.p.val}kg</title></circle>`).join('');
+  const dots = coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="3" fill="#C9932A"><title>${c.p.week} — ${c.p.date} : ${c.p.val}${unit}</title></circle>`).join('');
   const valueLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${Math.max(c.y - 6, 8).toFixed(1)}" font-size="8" font-weight="700" fill="#C9932A" text-anchor="middle">${c.p.val}</text>`).join('');
   const weekLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${h - 2}" font-size="7" fill="#888880" text-anchor="middle">${c.p.week}</text>`).join('');
   return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:100px;display:block">
@@ -1803,22 +1803,61 @@ function renderDashCharts() {
     return;
   }
 
-  const codeSessions = sessions.filter(s => s.seance === dashSeance).sort((a, b) => weekNum(a.week) - weekNum(b.week));
-  const def = SEANCES[dashSeance];
-  let exoOrder = def ? def.exercices.filter(e => !e.dropWeights && !e.superset).map(e => e.nom) : [];
-  codeSessions.forEach(s => Object.keys(s.weights || {}).forEach(k => { if (!exoOrder.includes(k)) exoOrder.push(k); }));
+  const cycleWeeks = dashCycle ? CYCLES[dashCycle].weeks : null;
+  const codeSessions = sessions
+    .filter(s => s.seance === dashSeance && (!cycleWeeks || cycleWeeks.includes(s.week)))
+    .sort((a, b) => weekNum(a.week) - weekNum(b.week));
+
+  // Une série de points par "ligne" de suivi : un exercice simple = 1 courbe,
+  // un exercice en superset / drop-set = 1 courbe distincte par case de poids.
+  const series = new Map();
+  const addSeries = (key, title, sub, unit) => { if (!series.has(key)) series.set(key, { title, sub, unit, points: [] }); return series.get(key); };
+
+  // Ordre d'affichage : celui du programme (semaine par semaine), puis les clés restantes
+  const weeks = cycleWeeks || Object.keys(PROGRAMME);
+  weeks.forEach(wk => {
+    if (!(PROGRAMME[wk]?.seances || []).includes(dashSeance)) return;
+    const def = getSeanceDef(wk, dashSeance);
+    (def?.exercices || []).forEach(exo => {
+      if (exo.multilineSeries) return;
+      if (exo.superset || exo.dropWeights) {
+        const labels = exo.superset || Array.from({ length: exo.dropWeights }, (_, i) => `Charge ${i + 1}`);
+        labels.forEach((lab, i) => addSeries(`${exo.nom}||s${i}`, lab, exo.nom, /m\/s/.test(lab) ? 'm/s' : 'kg'));
+      } else {
+        addSeries(`${exo.nom}||0`, exo.nom, '', 'kg');
+      }
+    });
+  });
+
+  codeSessions.forEach(s => {
+    Object.entries(s.weights || {}).forEach(([nom, val]) => {
+      if (Array.isArray(val)) {
+        val.forEach((v, i) => {
+          if (typeof v !== 'number') return;
+          const sr = addSeries(`${nom}||s${i}`, `Case ${i + 1}`, nom, 'kg');
+          sr.points.push({ week: s.week, val: v, date: s.date });
+        });
+      } else if (typeof val === 'number') {
+        const sr = addSeries(`${nom}||0`, nom, '', 'kg');
+        sr.points.push({ week: s.week, val, date: s.date });
+      }
+    });
+  });
 
   let html = '';
-  exoOrder.forEach(lift => {
-    const points = codeSessions.filter(s => typeof s.weights?.[lift] === 'number').map(s => ({ week: s.week, val: s.weights[lift], date: s.date }));
-    if (!points.length) return;
+  series.forEach(sr => {
+    if (!sr.points.length) return;
+    const last = sr.points[sr.points.length - 1].val;
     html += `
       <div class="stat-card" style="margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:500">${lift}</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold)">${points[points.length-1].val} kg</span>
+          <div>
+            <div style="font-size:13px;font-weight:500">${sr.title}</div>
+            ${sr.sub ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${sr.sub}</div>` : ''}
+          </div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--gold);white-space:nowrap">${last} ${sr.unit}</span>
         </div>
-        ${buildLineChart(points)}
+        ${buildLineChart(sr.points, sr.unit)}
       </div>
     `;
   });
