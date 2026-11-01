@@ -766,6 +766,7 @@ const CYCLES = {
   "conjugate": { label: "Conjugate Force/Masse/Balistique", weeks: ["S6","S7","S8","S9","S10"] },
   "conjugate2": { label: "Conjugate suite", weeks: ["S11","S12","S13","S14"] },
   "cycle3": { label: "Conjugate : Force pec/dos - Puissance bas", weeks: ["S15","S16","S17","S18","S19"] },
+  "tests3": { label: "Tests post-cycle 3", weeks: ["S20"] },
   // prochain cycle à ajouter ici une fois défini par le coach
 };
 
@@ -804,6 +805,7 @@ const PROGRAMME = {
   "S17": { label: "Semaine 17", seances: ["C3A","C3B","C3C","C3D"] },
   "S18": { label: "Semaine 18", seances: ["C3A","C3B","C3C","C3D"] },
   "S19": { label: "Semaine 19", seances: ["C3A","C3B","C3C","C3D"] },
+  "S20": { label: "Semaine 20", seances: ["T3A","T3B","T3C","T3D"] },
 };
 
 const SEANCES = {
@@ -1075,6 +1077,56 @@ const SEANCES = {
       { nom: "Superset : Biceps curl barre EZ / Triceps poulie haute unilatéral",      series: "3 × 10 + 10", tempo: "/", rpe: "8",  recup: "1'15", superset: ["Barre EZ", "Triceps ext."] },
       { nom: "Drop-set (x3) : Biceps curl corde poulie basse",                         series: "3 × 12 + max + max", tempo: "/", rpe: "10", recup: "2'", dropWeights: 3 },
       { nom: "Drop-set (x3) : Triceps corde poulie haute",                             series: "3 × 12 + max + max", tempo: "/", rpe: "10", recup: "2'", dropWeights: 3 },
+    ]
+  },
+
+  // ── Semaine 20 : tests post-cycle 3 + allègement (2 séries, RPE 7 max hors tests) ──
+  "T3A": {
+    label: "Renfo jambes/épaules (allégé)",
+    color: "#C0392B",
+    warmup: "<strong>Échauffement :</strong> 3’ rameur (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 10 pas/côté monster walk<br>— 10 glute bridge<br>— 15 montées sur pointe de pied<br>— 10 pull apart élastique<br>— 30’’ gainage<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br>— 10/côté ouverture thoracique<br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br><strong>Potentialisation :</strong> Montée en charge sur back squat",
+    exercices: [
+      { nom: "Back squat",                                       series: "3 × 6",       tempo: "/",       rpe: "6-7", recup: "2'-2'30", detail: "Charge indicative : 110 kg — note le RPE réel de chaque série" },
+      { nom: "Superset : Leg extension / RDL",                   series: "2 × 8 + 8",   tempo: "1/0/1/0", rpe: "7",   recup: "1'30", superset: ["Leg ext.", "RDL"], detail: "Charge indicative : 85 / 85 kg" },
+      { nom: "Superset : Abduction / adduction poulie basse",    series: "2 × 12 + 12/côté", tempo: "1/0/1/0", rpe: "7", recup: "1'30", superset: ["Abduction", "Adduction"], detail: "À la poulie basse, unilatéral (remplace la machine) — charge légère" },
+      { nom: "Développé militaire haltère",                      series: "2 × 8",       tempo: "1/0/1/0", rpe: "7",   recup: "1'30", detail: "Charge indicative : 26 kg" },
+      { nom: "Superset : Élévations latérales / reverse fly",    series: "2 × 10 + 10", tempo: "1/0/1/2", rpe: "7",   recup: "1'30", superset: ["Latérales", "Reverse fly"], detail: "Charge indicative : 10 / 6 kg" },
+      { nom: "Core",                                             series: "2 tours – 45'' récup entre chaque tour :<br>— 10 abdos roulette (ou avec barre + poids si pas de roulette)<br>— 15 Crunch corde poulie<br>— 20 Russian twist banc à abdo avec plate<br>— 1' gainage planche", tempo: "—", rpe: "—", recup: "—", multilineSeries: true },
+    ]
+  },
+  "T3B": {
+    label: "Tests 3RM haut du corps",
+    color: "#7B1D1D",
+    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 15 pull apart élastique<br>— 10 rotation externe élastique<br>— 10 pompes scapula<br>— 10 tractions scapula<br>— 30’’ gainage<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté ouverture thoracique<br>— 10/côté rétropulsion épaule élastique<br><strong>Potentialisation :</strong> Montée en charge DC (non comptée) : barre × 10, 60 kg × 5, 80 kg × 3, 90 kg × 2 — 1'30-2' de récup",
+    exercices: [
+      { nom: "Développé couché — test 3RM",                      series: "Paliers de 3 reps", tempo: "1/0/1/0", rpe: "Test", recup: "4' entre les paliers", superset: ["3RM"], detail: "Mêmes paliers qu'en S1 : 100 → 105 → 110 kg (en S1 : 3RM à 105 kg, échec à la 3e rep à 110). Si 110 passe : 112,5 kg (RPE 9) ou 115 kg (RPE 8 ou moins). Arrêt au 1er échec ou à RPE 10. Tête sur le banc, ni rebond ni pause. Mets le 3RM validé dans la case, les paliers et RPE dans la note." },
+      { nom: "Tractions lestées — test 3RM",                     series: "Paliers de 3 reps", tempo: "1/0/1/0", rpe: "Test", recup: "4' entre les paliers", superset: ["3RM lest"], detail: "Montée : 5 au poids du corps, puis 3 à +7,5 kg (2' de récup). Paliers : +15 → +20 → +25 kg (3RM de S1 à RPE 10). Si +25 passe : +27,5 kg (RPE 9) ou +30 kg (RPE 8 ou moins). Bras tendus en bas, menton au-dessus de la barre, sans kipping." },
+      { nom: "Développé incliné haltère",                        series: "2 × 10",      tempo: "1/0/1/0", rpe: "7",   recup: "1'30-2'", detail: "Charge indicative : 28 kg" },
+      { nom: "Tirage horizontal unilatéral",                     series: "2 × 10",      tempo: "1/0/1/0", rpe: "7",   recup: "1'30", detail: "Charge indicative : 50 kg" },
+      { nom: "Superset : Pull over poulie haute / Pec fly",      series: "2 × 12 + 12", tempo: "1/0/1/0", rpe: "7",   recup: "1'30", superset: ["Pull over", "Pec fly"], detail: "Charge indicative : 38 / 56 kg" },
+    ]
+  },
+  "T3C": {
+    label: "Test vitesse trap bar",
+    color: "#D2691E",
+    warmup: "<strong>Échauffement :</strong> 3’ vélo (RPE 3/4)<br><strong>Activation (2 tours) :</strong><br>— 10 pas/côté monster walk<br>— 10 glute bridge<br>— 30’’ gainage<br>— 15 montées sur pointe de pied<br><strong>Mobilité (2 tours) :</strong><br>— 10/côté ouverture de hanche (position quadrupédie, genou fléchi, 5 grands cercles en contrôlé dans chaque sens)<br>— 10/côté dorsiflexion cheville (chevalier servant, remonte la cheville vers le haut, en bloquant 3’’ en haut)<br><strong>Potentialisation :</strong><br>— Pogo jump : 2 × 10<br>— Squat jump à vide : 2 × 5<br>— Trap bar 50 kg × 3, non mesuré (pour attaquer le 70 kg à pleine vitesse)",
+    exercices: [
+      { nom: "Deadlift trap bar — test VBT",                     series: "5 charges",   tempo: "Intention de vitesse ++", rpe: "Test", recup: "2' à 3'", superset: ["70 kg (m/s)", "100 kg (m/s)", "130 kg (m/s)", "160 kg (m/s)", "190 kg (m/s)"], detail: "70 kg × 5 · 100 kg × 5 · 130 kg × 5 · 160 kg × 3 · 190 kg × 2 — mêmes charges qu'au test du 01/10 (vitesses S1 : 1,13 · 1,11 · 0,96 · 0,75 · 0,43 m/s). Récup : 2' après 70 et 100 kg, 2'30 après 130 kg, 3' après 160 kg. Départ arrêté au sol à chaque rep, même capteur au même endroit, même valeur retenue qu'en S1." },
+      { nom: "Drop jump",                                        series: "2 × 3",       tempo: "Temps au sol le plus bref possible + hauteur max", rpe: "/", recup: "2'", detail: "Box de départ" },
+      { nom: "Superset : Split squat haltère / Leg curl",        series: "2 × 8/jambe + 10", tempo: "1/0/1/0", rpe: "7", recup: "1'30", superset: ["Split squat", "Leg curl"], detail: "Charges environ 15 % sous celles de S17" },
+      { nom: "Extension GHD",                                    series: "2 × 10",      tempo: "1/0/1/0", rpe: "7",   recup: "1'30", detail: "Charge indicative : 40 kg" },
+      { nom: "Calf extension smith machine",                     series: "2 × 12",      tempo: "1/0/1/0", rpe: "7",   recup: "1'30", detail: "Charge indicative : 50 kg" },
+      { nom: "Pallof press",                                     series: "2 × 10/côté", tempo: "1/0/3/0", rpe: "7",   recup: "1'", detail: "Charge indicative : 18 kg" },
+    ]
+  },
+  "T3D": {
+    label: "Biceps triceps (allégé)",
+    color: "#7B1D1D",
+    warmup: "<strong>Échauffement :</strong> 3’ AB (RPE 3/4) + 1 série légère de 15 sur le premier superset",
+    exercices: [
+      { nom: "Superset : Biceps curl banc incliné / Triceps corde poulie basse",       series: "2 × 10-12 + 10-12", tempo: "/", rpe: "7", recup: "1'15", superset: ["Biceps curl", "Triceps corde"], detail: "Charge indicative : 12 / 30 kg" },
+      { nom: "Superset : Biceps marteau haltère alterné / Triceps barre EZ au front",  series: "2 × 10-12 + 10-12", tempo: "/", rpe: "7", recup: "1'15", superset: ["Curl marteau", "Triceps front"], detail: "Charge indicative : 16 / 10 kg" },
+      { nom: "Superset : Biceps curl barre EZ / Triceps poulie haute unilatéral",      series: "2 × 8-10 + 8-10",   tempo: "/", rpe: "7", recup: "1'15", superset: ["Barre EZ", "Triceps ext."], detail: "Charge indicative : 12,5 / 17,5 kg — pas de drop-sets cette semaine" },
     ]
   },
 };
