@@ -617,7 +617,7 @@
   <div class="pin-box">
     <div class="logo">JOX<span>.</span>TRAINING</div>
     <div class="pin-sub">Entre le code d'accès</div>
-    <input type="password" inputmode="numeric" autocomplete="off" class="pin-input" id="pinInput" placeholder="••••" onkeydown="if(event.key==='Enter') checkPin()">
+    <input type="password" autocomplete="current-password" class="pin-input" id="pinInput" placeholder="Code d'accès" onkeydown="if(event.key==='Enter') checkPin()">
     <button class="save-btn" onclick="checkPin()">Entrer</button>
     <div class="pin-error" id="pinError">Code incorrect</div>
   </div>
@@ -753,7 +753,9 @@ const SUPABASE_URL = "https://itubxfyqqpthwpqhbrje.supabase.co";
 // à un JWT complet quand il sert la page (ex: "eyJhbGci...eyJpc3M....xyz"), ce qui cassait
 // la connexion à Supabase. En la reconstruisant à l'exécution, ça évite ce problème.
 const SUPABASE_ANON_KEY = ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0dWJ4ZnlxcXB0aHdwcWhicmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjk4NzcsImV4cCI6MjA5ODc0NTg3N30", "l_E1eAgVRusOJNHHDGbn3ulEXexYJp25gPUG2_7CGBM"].join(".");
-const APP_PIN = "2468"; // change ce code si tu veux, partage-le uniquement avec ton athlète
+// Connexion : le code d'accès est le mot de passe du compte Supabase ci-dessous.
+// Il n'est plus écrit dans le code : c'est Supabase qui le vérifie.
+const LOGIN_EMAIL = "jox@athletes.invalid";
 const ATHLETE = "Jox";
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1344,14 +1346,23 @@ let dataCache = {};
 // ═══════════════════════════════════════════════════
 // PIN GATE
 // ═══════════════════════════════════════════════════
-function checkPin() {
-  const val = document.getElementById('pinInput').value;
-  if (val === APP_PIN) {
-    localStorage.setItem('jox_pin_ok', '1');
-    unlockApp();
-  } else {
-    document.getElementById('pinError').style.display = 'block';
+let loginBusy = false;
+async function checkPin() {
+  const input = document.getElementById('pinInput');
+  const errEl = document.getElementById('pinError');
+  if (!input.value || loginBusy) return;
+  loginBusy = true;
+  errEl.style.display = 'none';
+  const { error } = await db.auth.signInWithPassword({ email: LOGIN_EMAIL, password: input.value });
+  loginBusy = false;
+  if (error) {
+    console.error(error);
+    errEl.textContent = (error.code === 'invalid_credentials' || error.status === 400) ? 'Code incorrect' : 'Connexion impossible, réessaie dans un instant';
+    errEl.style.display = 'block';
+    return;
   }
+  input.value = '';
+  unlockApp();
 }
 
 // À l'ouverture : se placer sur la séance qui suit la dernière séance enregistrée
@@ -1382,9 +1393,13 @@ async function unlockApp() {
   updateHooper();
 }
 
-if (localStorage.getItem('jox_pin_ok') === '1') {
-  unlockApp();
-}
+// La session Supabase reste mémorisée sur l'appareil : pas besoin de retaper le code.
+try { localStorage.removeItem('jox_pin_ok'); } catch (e) {}
+db.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    unlockApp();
+  }
+});
 
 // ═══════════════════════════════════════════════════
 // DATA (Supabase)
